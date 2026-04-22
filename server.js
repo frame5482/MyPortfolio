@@ -182,6 +182,55 @@ app.delete('/api/works/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// Edit work (auth required)
+app.put('/api/works/:id', authMiddleware, upload.single('image'), async (req, res) => {
+  try {
+    const work = await Work.findById(req.params.id);
+    if (!work) {
+      return res.status(404).json({ error: 'Work not found' });
+    }
+
+    const { title, description, tags, video_url } = req.body;
+    if (!title || !tags) {
+      return res.status(400).json({ error: 'Title and tags are required' });
+    }
+
+    let new_image_url = work.image_url;
+    if (req.file) {
+      new_image_url = `/uploads/${req.file.filename}`;
+      // Delete old image if it exists and is a local file
+      if (work.image_url && work.image_url.startsWith('/uploads/')) {
+        const oldPath = path.join(__dirname, work.image_url);
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+      }
+    }
+
+    if (!new_image_url && !video_url && !work.video_url) {
+      return res.status(400).json({ error: 'Image or YouTube URL is required' });
+    }
+
+    work.title = title;
+    work.description = description || '';
+    work.tags = tags;
+    work.video_url = video_url || null;
+    work.image_url = new_image_url;
+    
+    await work.save();
+
+    res.json({
+      id: work._id,
+      title: work.title, 
+      description: work.description, 
+      image_url: work.image_url, 
+      video_url: work.video_url, 
+      tags: work.tags,
+      message: 'Work updated successfully ✨'
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // --- SPA Fallback ---
 app.get('*', (req, res) => {
   // Serve specific HTML pages

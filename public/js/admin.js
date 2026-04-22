@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let authToken = localStorage.getItem('artfolio_token') || null;
+let editingId = null;
 
 // --- Navigation ---
 function initNav() {
@@ -162,9 +163,12 @@ function initUpload() {
     if (videoUrl) formData.append('video_url', videoUrl);
     if (imageFile) formData.append('image', imageFile);
 
+    const method = editingId ? 'PUT' : 'POST';
+    const url = editingId ? `/api/works/${editingId}` : '/api/works';
+
     try {
-      const res = await fetch('/api/works', {
-        method: 'POST',
+      const res = await fetch(url, {
+        method: method,
         headers: { 'Authorization': `Bearer ${authToken}` },
         body: formData
       });
@@ -180,14 +184,25 @@ function initUpload() {
         showToast(data.error || 'อัปโหลดล้มเหลว', 'error');
         return;
       }
-      showToast('อัปโหลดสำเร็จ! ✨');
-      form.reset();
-      document.getElementById('imagePreview').classList.remove('visible');
+      showToast(editingId ? 'อัปเดตผลงานสำเร็จ! ✨' : 'อัปโหลดสำเร็จ! ✨');
+      cancelEdit();
       loadAdminWorks();
     } catch (err) {
       showToast('เกิดข้อผิดพลาด', 'error');
     }
   });
+
+  document.getElementById('cancelEditBtn').addEventListener('click', cancelEdit);
+}
+
+function cancelEdit() {
+  editingId = null;
+  document.getElementById('uploadForm').reset();
+  document.getElementById('imagePreview').classList.remove('visible');
+  document.getElementById('previewImg').src = '';
+  document.getElementById('submitBtn').innerHTML = '✨ อัปโหลด';
+  document.getElementById('cancelEditBtn').style.display = 'none';
+  document.querySelector('.upload-card h2').textContent = '📤 อัปโหลดผลงานใหม่';
 }
 
 // --- Load Admin Works List ---
@@ -196,6 +211,8 @@ async function loadAdminWorks() {
     const res = await fetch('/api/works');
     const works = await res.json();
     const container = document.getElementById('worksList');
+
+    window.adminWorks = works; // Store globally for editing
 
     if (works.length === 0) {
       container.innerHTML = '<div class="empty-state"><div class="emoji">📭</div><p>ยังไม่มีผลงาน</p></div>';
@@ -212,13 +229,41 @@ async function loadAdminWorks() {
           <h3>${work.title}</h3>
           <p>${work.tags} ${videoBadge}</p>
         </div>
-        <button class="btn btn-danger btn-sm" onclick="deleteWork(${work.id})">🗑 ลบ</button>
+        <div style="display: flex; gap: 5px;">
+          <button class="btn btn-primary btn-sm" onclick="editWork('${work.id}')">✏️ แก้ไข</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteWork('${work.id}')">🗑 ลบ</button>
+        </div>
       </div>
     `;
     }).join('');
   } catch (err) {
     console.error('Failed to load works:', err);
   }
+}
+
+// --- Edit Work ---
+function editWork(id) {
+  const work = window.adminWorks.find(w => w.id === id);
+  if (!work) return;
+
+  editingId = id;
+  document.getElementById('workTitle').value = work.title;
+  document.getElementById('workDesc').value = work.description || '';
+  document.getElementById('workTags').value = work.tags;
+  document.getElementById('workVideo').value = work.video_url || '';
+  
+  if (work.image_url) {
+    document.getElementById('previewImg').src = work.image_url;
+    document.getElementById('imagePreview').classList.add('visible');
+  } else {
+    document.getElementById('imagePreview').classList.remove('visible');
+  }
+
+  document.getElementById('submitBtn').innerHTML = '💾 บันทึกการแก้ไข';
+  document.getElementById('cancelEditBtn').style.display = 'block';
+  document.querySelector('.upload-card h2').textContent = '✏️ แก้ไขผลงาน';
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // --- Delete Work ---
