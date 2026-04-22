@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- Database ---
-const db = require('./db/setup');
+const Work = require('./db/setup');
 
 // --- Middleware ---
 app.use(cors());
@@ -85,33 +85,44 @@ app.post('/api/login', (req, res) => {
 });
 
 // Get all works (optional tag filter)
-app.get('/api/works', (req, res) => {
+app.get('/api/works', async (req, res) => {
   try {
     const { tag } = req.query;
-    let works;
+    let query = {};
     if (tag) {
-      works = db.prepare(
-        `SELECT * FROM works WHERE ',' || tags || ',' LIKE '%,' || ? || ',%' ORDER BY created_at DESC`
-      ).all(tag);
-    } else {
-      works = db.prepare('SELECT * FROM works ORDER BY created_at DESC').all();
+      // Tags are stored as comma-separated strings, use regex for finding the tag
+      query = { tags: { $regex: new RegExp(`\\\\b${tag}\\\\b`, 'i') } };
     }
-    res.json(works);
+    const works = await Work.find(query).sort({ created_at: -1 });
+    
+    // Map _id to id for frontend
+    const mappedWorks = works.map(w => ({
+      id: w._id,
+      title: w.title,
+      description: w.description,
+      image_url: w.image_url,
+      video_url: w.video_url,
+      tags: w.tags,
+      created_at: w.created_at
+    }));
+    res.json(mappedWorks);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 // Get unique tags
-app.get('/api/tags', (req, res) => {
+app.get('/api/tags', async (req, res) => {
   try {
-    const rows = db.prepare('SELECT tags FROM works').all();
+    const works = await Work.find({}, 'tags');
     const tagSet = new Set();
-    rows.forEach(row => {
-      row.tags.split(',').forEach(t => {
-        const trimmed = t.trim();
-        if (trimmed) tagSet.add(trimmed);
-      });
+    works.forEach(row => {
+      if (row.tags) {
+        row.tags.split(',').forEach(t => {
+          const trimmed = t.trim();
+          if (trimmed) tagSet.add(trimmed);
+        });
+      }
     });
     res.json([...tagSet].sort());
   } catch (err) {
@@ -120,7 +131,7 @@ app.get('/api/tags', (req, res) => {
 });
 
 // Upload new work (auth required)
-app.post('/api/works', authMiddleware, upload.single('image'), (req, res) => {
+app.post('/api/works', authMiddleware, upload.single('image'), async (req, res) => {
   try {
     const { title, description, tags, video_url } = req.body;
     if (!title || !tags) {
@@ -130,11 +141,18 @@ app.post('/api/works', authMiddleware, upload.single('image'), (req, res) => {
       return res.status(400).json({ error: 'Image or YouTube URL is required' });
     }
     const image_url = req.file ? `/uploads/${req.file.filename}` : '';
-    const result = db.prepare(
-      'INSERT INTO works (title, description, image_url, video_url, tags) VALUES (?, ?, ?, ?, ?)'
-    ).run(title, description || '', image_url, video_url || null, tags);
+    
+    const newWork = new Work({
+      title,
+      description: description || '',
+      image_url,
+      video_url: video_url || null,
+      tags
+    });
+    await newWork.save();
+
     res.json({
-      id: result.lastInsertRowid,
+      id: newWork._id,
       title, description, image_url, video_url: video_url || null, tags,
       message: 'Work uploaded successfully ✨'
     });
@@ -144,20 +162,20 @@ app.post('/api/works', authMiddleware, upload.single('image'), (req, res) => {
 });
 
 // Delete work (auth required)
-app.delete('/api/works/:id', authMiddleware, (req, res) => {
+app.delete('/api/works/:id', authMiddleware, async (req, res) => {
   try {
-    const work = db.prepare('SELECT * FROM works WHERE id = ?').get(req.params.id);
+    const work = await Work.findById(req.params.id);
     if (!work) {
       return res.status(404).json({ error: 'Work not found' });
     }
     // Delete image file if it's a local upload
-    if (work.image_url.startsWith('/uploads/')) {
+    if (work.image_url && work.image_url.startsWith('/uploads/')) {
       const filePath = path.join(__dirname, work.image_url);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
     }
-    db.prepare('DELETE FROM works WHERE id = ?').run(req.params.id);
+    await Work.findByIdAndDelete(req.params.id);
     res.json({ message: 'Work deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
