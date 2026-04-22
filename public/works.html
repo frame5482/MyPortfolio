@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ผลงาน — Artfolio ✨</title>
+  <meta name="description" content="Browse the creative portfolio — illustrations, character designs, UI designs, and more.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼</text></svg>">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/works.css">
+</head>
+<body>
+
+  <div class="bg-decorations">
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="nav" id="mainNav">
+    <a href="/" class="nav-logo">
+      <span class="logo-icon">🎨</span>
+      <span>Artfolio</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/">✦ Home</a></li>
+      <li><a href="/works" class="active">🖼 Works</a></li>
+      <li><a href="/admin">🔐 Admin</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-content">
+    <div class="works-header">
+      <h1>🖼 ผลงานของฉัน</h1>
+      <p>รวมผลงานศิลปะ ภาพประกอบ และงานออกแบบ</p>
+    </div>
+
+    <!-- Tag Filters -->
+    <div class="tag-filters" id="tagFilters">
+      <button class="tag-btn active" data-tag="all">✦ ทั้งหมด</button>
+    </div>
+
+    <!-- Works Grid -->
+    <div class="works-grid" id="worksGrid">
+      <div class="spinner" id="loadingSpinner"></div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="emoji">🎨</div>
+      <p>ยังไม่มีผลงาน... กลับมาดูใหม่เร็วๆ นี้นะ!</p>
+    </div>
+  </main>
+
+  <div class="lightbox-overlay" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose">✕</button>
+    <div class="lightbox-content">
+      <div class="lightbox-media" id="lightboxMedia">
+        <img src="" alt="" id="lightboxImg">
+      </div>
+      <div class="lightbox-body">
+        <h2 id="lightboxTitle"></h2>
+        <p id="lightboxDesc"></p>
+        <div class="card-tags" id="lightboxTags"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>Made with 💜 by Creative Artist · © 2026</p>
+  </footer>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/works.js"></script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+// ============================================================
+// Admin Page — admin.js
+// ============================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+  initNav();
+  initNavScroll();
+  checkAuth();
+  initLogin();
+  initUpload();
+  initFileUpload();
+  initLogout();
+});
+
+let authToken = localStorage.getItem('artfolio_token') || null;
+
+// --- Navigation ---
+function initNav() {
+  const toggle = document.getElementById('navToggle');
+  const links = document.getElementById('navLinks');
+  if (toggle && links) {
+    toggle.addEventListener('click', () => links.classList.toggle('open'));
+    links.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => links.classList.remove('open'));
+    });
+  }
+}
+
+function initNavScroll() {
+  const nav = document.getElementById('mainNav');
+  if (!nav) return;
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 50);
+  });
+}
+
+// --- Toast ---
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `${type === 'success' ? '✅' : '❌'} ${message}`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('fade-out');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+// --- Auth Check ---
+function checkAuth() {
+  if (authToken) {
+    showAdminPanel();
+    loadAdminWorks();
+  }
+}
+
+function showAdminPanel() {
+  document.getElementById('loginSection').style.display = 'none';
+  document.getElementById('uploadSection').classList.add('visible');
+  document.getElementById('worksListSection').classList.add('visible');
+  document.getElementById('adminTopbar').classList.add('visible');
+}
+
+function hideAdminPanel() {
+  document.getElementById('loginSection').style.display = '';
+  document.getElementById('uploadSection').classList.remove('visible');
+  document.getElementById('worksListSection').classList.remove('visible');
+  document.getElementById('adminTopbar').classList.remove('visible');
+}
+
+// --- Login ---
+function initLogin() {
+  const form = document.getElementById('loginForm');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const password = document.getElementById('passwordInput').value;
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error || 'รหัสผ่านไม่ถูกต้อง', 'error');
+        return;
+      }
+      authToken = data.token;
+      localStorage.setItem('artfolio_token', authToken);
+      showToast('เข้าสู่ระบบสำเร็จ! ✨');
+      showAdminPanel();
+      loadAdminWorks();
+    } catch (err) {
+      showToast('เกิดข้อผิดพลาด', 'error');
+    }
+  });
+}
+
+// --- Logout ---
+function initLogout() {
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    authToken = null;
+    localStorage.removeItem('artfolio_token');
+    hideAdminPanel();
+    document.getElementById('passwordInput').value = '';
+    showToast('ออกจากระบบแล้ว');
+  });
+}
+
+// --- File Upload Preview ---
+function initFileUpload() {
+  const area = document.getElementById('fileUploadArea');
+  const input = document.getElementById('workImage');
+  const preview = document.getElementById('imagePreview');
+  const previewImg = document.getElementById('previewImg');
+
+  input.addEventListener('change', () => {
+    if (input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewImg.src = e.target.result;
+        preview.classList.add('visible');
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  });
+
+  // Drag & drop
+  area.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    area.classList.add('dragover');
+  });
+  area.addEventListener('dragleave', () => area.classList.remove('dragover'));
+  area.addEventListener('drop', (e) => {
+    e.preventDefault();
+    area.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+      input.files = e.dataTransfer.files;
+      input.dispatchEvent(new Event('change'));
+    }
+  });
+}
+
+// --- Upload Work ---
+function initUpload() {
+  const form = document.getElementById('uploadForm');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const videoUrl = document.getElementById('workVideo').value.trim();
+    const imageFile = document.getElementById('workImage').files[0];
+
+    if (!imageFile && !videoUrl) {
+      showToast('กรุณาใส่รูปภาพ หรือ YouTube URL', 'error');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('title', document.getElementById('workTitle').value);
+    formData.append('description', document.getElementById('workDesc').value);
+    formData.append('tags', document.getElementById('workTags').value);
+    if (videoUrl) formData.append('video_url', videoUrl);
+    if (imageFile) formData.append('image', imageFile);
+
+    try {
+      const res = await fetch('/api/works', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${authToken}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (res.status === 401) {
+          authToken = null;
+          localStorage.removeItem('artfolio_token');
+          hideAdminPanel();
+          showToast('Session หมดอายุ กรุณาเข้าสู่ระบบใหม่', 'error');
+          return;
+        }
+        showToast(data.error || 'อัปโหลดล้มเหลว', 'error');
+        return;
+      }
+      showToast('อัปโหลดสำเร็จ! ✨');
+      form.reset();
+      document.getElementById('imagePreview').classList.remove('visible');
+      loadAdminWorks();
+    } catch (err) {
+      showToast('เกิดข้อผิดพลาด', 'error');
+    }
+  });
+}
+
+// --- Load Admin Works List ---
+async function loadAdminWorks() {
+  try {
+    const res = await fetch('/api/works');
+    const works = await res.json();
+    const container = document.getElementById('worksList');
+
+    if (works.length === 0) {
+      container.innerHTML = '<div class="empty-state"><div class="emoji">📭</div><p>ยังไม่มีผลงาน</p></div>';
+      return;
+    }
+
+    container.innerHTML = works.map(work => {
+      const thumbSrc = work.image_url || getYouTubeThumbnail(work.video_url);
+      const videoBadge = work.video_url ? '<span style="color:var(--peach-dark);font-size:0.75rem;">🎬 YouTube</span>' : '';
+      return `
+      <div class="admin-work-item" data-id="${work.id}">
+        <img src="${thumbSrc}" alt="${work.title}" class="admin-work-thumb">
+        <div class="admin-work-info">
+          <h3>${work.title}</h3>
+          <p>${work.tags} ${videoBadge}</p>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="deleteWork(${work.id})">🗑 ลบ</button>
+      </div>
+    `;
+    }).join('');
+  } catch (err) {
+    console.error('Failed to load works:', err);
+  }
+}
+
+// --- Delete Work ---
+async function deleteWork(id) {
+  if (!confirm('ต้องการลบผลงานนี้จริงๆ หรือ?')) return;
+  try {
+    const res = await fetch(`/api/works/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      if (res.status === 401) {
+        authToken = null;
+        localStorage.removeItem('artfolio_token');
+        hideAdminPanel();
+        showToast('Session หมดอายุ', 'error');
+        return;
+      }
+      showToast(data.error || 'ลบล้มเหลว', 'error');
+      return;
+    }
+    showToast('ลบผลงานสำเร็จ');
+    loadAdminWorks();
+  } catch (err) {
+    showToast('เกิดข้อผิดพลาด', 'error');
+  }
+}
+
+// --- YouTube Helpers ---
+function getYouTubeId(url) {
+  if (!url) return null;
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
+  return match ? match[1] : null;
+}
+
+function getYouTubeThumbnail(url) {
+  const id = getYouTubeId(url);
+  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : '';
+}

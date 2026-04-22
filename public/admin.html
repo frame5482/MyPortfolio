@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Artfolio 🔐</title>
+  <meta name="description" content="Admin panel for managing portfolio works.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+
+  <div class="bg-decorations">
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="nav" id="mainNav">
+    <a href="/" class="nav-logo">
+      <span class="logo-icon">🎨</span>
+      <span>Artfolio</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/">✦ Home</a></li>
+      <li><a href="/works">🖼 Works</a></li>
+      <li><a href="/admin" class="active">🔐 Admin</a></li>
+    </ul>
+  </nav>
+
+  <main class="page-content">
+    <div class="admin-container">
+
+      <div class="admin-header">
+        <h1>🔐 Admin Panel</h1>
+        <p>จัดการผลงานของคุณ</p>
+      </div>
+
+      <!-- Logout topbar -->
+      <div class="admin-topbar" id="adminTopbar">
+        <button class="btn btn-secondary btn-sm" id="logoutBtn">🚪 ออกจากระบบ</button>
+      </div>
+
+      <!-- Login Section -->
+      <div class="login-section glass-card" id="loginSection">
+        <span class="login-icon">🔑</span>
+        <h2>เข้าสู่ระบบ</h2>
+        <p>กรอกรหัสผ่านเพื่อจัดการผลงาน</p>
+        <form class="login-form" id="loginForm">
+          <input type="password" id="passwordInput" placeholder="รหัสผ่าน..." required autocomplete="current-password">
+          <button type="submit" class="btn btn-primary">🔓 เข้าสู่ระบบ</button>
+        </form>
+      </div>
+
+      <!-- Upload Section -->
+      <div class="upload-section" id="uploadSection">
+        <div class="upload-card glass-card">
+          <h2>📤 อัปโหลดผลงานใหม่</h2>
+          <form id="uploadForm">
+            <div class="form-group">
+              <label for="workTitle">ชื่อผลงาน</label>
+              <input type="text" id="workTitle" placeholder="เช่น Dreamy Forest" required>
+            </div>
+            <div class="form-group">
+              <label for="workDesc">คำอธิบาย</label>
+              <textarea id="workDesc" placeholder="เล่าเกี่ยวกับผลงานนี้..." rows="3"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="workTags">แท็ก (คั่นด้วยคอมมา)</label>
+              <input type="text" id="workTags" placeholder="เช่น illustration, character, fantasy" required>
+            </div>
+            <div class="form-group">
+              <label for="workVideo">🎬 YouTube URL (ไม่บังคับ)</label>
+              <input type="url" id="workVideo" placeholder="เช่น https://www.youtube.com/watch?v=xxxxx">
+              <small style="color: var(--text-lighter); font-size: 0.8rem;">ใส่ลิงก์ YouTube จะเล่นวิดีโออัตโนมัติเมื่อเปิดดู</small>
+            </div>
+            <div class="form-group">
+              <label>รูปภาพ (ไม่บังคับถ้าใส่ YouTube)</label>
+              <div class="file-upload-area" id="fileUploadArea">
+                <div class="upload-icon">📁</div>
+                <p>ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือก</p>
+                <input type="file" id="workImage" accept="image/*">
+              </div>
+              <div class="image-preview" id="imagePreview">
+                <img src="" alt="Preview" id="previewImg">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">✨ อัปโหลด</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Existing Works -->
+      <div class="works-list-section" id="worksListSection">
+        <h2>📋 ผลงานทั้งหมด</h2>
+        <div id="worksList"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Made with 💜 by Creative Artist · © 2026</p>
+  </footer>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/admin.js"></script>
+</body>
+</html>
