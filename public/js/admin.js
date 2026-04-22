@@ -127,6 +127,15 @@ function initFileUpload() {
     }
   });
 
+  const removeImgBtn = document.getElementById('removeImgBtn');
+  if (removeImgBtn) {
+    removeImgBtn.addEventListener('click', () => {
+      input.value = '';
+      previewImg.src = '';
+      preview.classList.remove('visible');
+    });
+  }
+
   // Drag & drop
   area.addEventListener('dragover', (e) => {
     e.preventDefault();
@@ -224,7 +233,7 @@ async function loadAdminWorks() {
       const videoBadge = work.video_url ? '<span style="color:var(--peach-dark);font-size:0.75rem;">🎬 YouTube</span>' : '';
       return `
       <div class="admin-work-item" data-id="${work.id}">
-        <img src="${thumbSrc}" alt="${work.title}" class="admin-work-thumb">
+        <img src="${thumbSrc}" alt="${work.title}" class="admin-work-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23f0f0f0\\'/><text y=\\'50%\\' x=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' font-size=\\'40\\'>🖼</text></svg>'">
         <div class="admin-work-info">
           <h3>${work.title}</h3>
           <p>${work.tags} ${videoBadge}</p>

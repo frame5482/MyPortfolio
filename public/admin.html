@@ -92,11 +92,15 @@
                 <p>ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือก</p>
                 <input type="file" id="workImage" accept="image/*">
               </div>
-              <div class="image-preview" id="imagePreview">
-                <img src="" alt="Preview" id="previewImg">
+              <div class="image-preview" id="imagePreview" style="position: relative;">
+                <button type="button" id="removeImgBtn" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; border: none; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,0,0,0.8)'" onmouseout="this.style.background='rgba(0,0,0,0.6)'">✖</button>
+                <img src="" alt="Preview" id="previewImg" style="border-radius: 8px;">
               </div>
             </div>
-            <button type="submit" class="btn btn-primary" style="width:100%;">✨ อัปโหลด</button>
+            <div style="display: flex; gap: 10px;">
+              <button type="submit" id="submitBtn" class="btn btn-primary" style="flex: 1;">✨ อัปโหลด</button>
+              <button type="button" id="cancelEditBtn" class="btn" style="display: none; background: #ddd; color: #333;">❌ ยกเลิก</button>
+            </div>
           </form>
         </div>
       </div>
