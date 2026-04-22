@@ -133,14 +133,14 @@ app.get('/api/tags', async (req, res) => {
 // Upload new work (auth required)
 app.post('/api/works', authMiddleware, upload.single('image'), async (req, res) => {
   try {
-    const { title, description, tags, video_url } = req.body;
+    const { title, description, tags, video_url, external_image_url } = req.body;
     if (!title || !tags) {
       return res.status(400).json({ error: 'Title and tags are required' });
     }
-    if (!req.file && !video_url) {
+    if (!req.file && !video_url && !external_image_url) {
       return res.status(400).json({ error: 'Image or YouTube URL is required' });
     }
-    const image_url = req.file ? `/uploads/${req.file.filename}` : '';
+    const image_url = req.file ? `/uploads/${req.file.filename}` : (external_image_url || '');
     
     const newWork = new Work({
       title,
@@ -190,7 +190,7 @@ app.put('/api/works/:id', authMiddleware, upload.single('image'), async (req, re
       return res.status(404).json({ error: 'Work not found' });
     }
 
-    const { title, description, tags, video_url } = req.body;
+    const { title, description, tags, video_url, external_image_url } = req.body;
     if (!title || !tags) {
       return res.status(400).json({ error: 'Title and tags are required' });
     }
@@ -199,6 +199,13 @@ app.put('/api/works/:id', authMiddleware, upload.single('image'), async (req, re
     if (req.file) {
       new_image_url = `/uploads/${req.file.filename}`;
       // Delete old image if it exists and is a local file
+      if (work.image_url && work.image_url.startsWith('/uploads/')) {
+        const oldPath = path.join(__dirname, work.image_url);
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+      }
+    } else if (external_image_url) {
+      new_image_url = external_image_url;
+      // Delete old image if it was local
       if (work.image_url && work.image_url.startsWith('/uploads/')) {
         const oldPath = path.join(__dirname, work.image_url);
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);

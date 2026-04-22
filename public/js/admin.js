@@ -131,10 +131,22 @@ function initFileUpload() {
   if (removeImgBtn) {
     removeImgBtn.addEventListener('click', () => {
       input.value = '';
+      document.getElementById('workImageUrl').value = '';
       previewImg.src = '';
       preview.classList.remove('visible');
     });
   }
+
+  const workImageUrl = document.getElementById('workImageUrl');
+  workImageUrl.addEventListener('input', () => {
+    if (workImageUrl.value.trim()) {
+      previewImg.src = workImageUrl.value.trim();
+      preview.classList.add('visible');
+      input.value = ''; // clear file if url is entered
+    } else if (!input.files[0]) {
+      preview.classList.remove('visible');
+    }
+  });
 
   // Drag & drop
   area.addEventListener('dragover', (e) => {
@@ -159,8 +171,9 @@ function initUpload() {
     e.preventDefault();
     const videoUrl = document.getElementById('workVideo').value.trim();
     const imageFile = document.getElementById('workImage').files[0];
+    const externalImageUrl = document.getElementById('workImageUrl').value.trim();
 
-    if (!imageFile && !videoUrl) {
+    if (!imageFile && !videoUrl && !externalImageUrl) {
       showToast('กรุณาใส่รูปภาพ หรือ YouTube URL', 'error');
       return;
     }
@@ -170,6 +183,7 @@ function initUpload() {
     formData.append('description', document.getElementById('workDesc').value);
     formData.append('tags', document.getElementById('workTags').value);
     if (videoUrl) formData.append('video_url', videoUrl);
+    if (externalImageUrl) formData.append('external_image_url', externalImageUrl);
     if (imageFile) formData.append('image', imageFile);
 
     const method = editingId ? 'PUT' : 'POST';
@@ -207,6 +221,7 @@ function initUpload() {
 function cancelEdit() {
   editingId = null;
   document.getElementById('uploadForm').reset();
+  document.getElementById('workImageUrl').value = '';
   document.getElementById('imagePreview').classList.remove('visible');
   document.getElementById('previewImg').src = '';
   document.getElementById('submitBtn').innerHTML = '✨ อัปโหลด';
@@ -261,6 +276,12 @@ function editWork(id) {
   document.getElementById('workTags').value = work.tags;
   document.getElementById('workVideo').value = work.video_url || '';
   
+  if (work.image_url && work.image_url.startsWith('http')) {
+    document.getElementById('workImageUrl').value = work.image_url;
+  } else {
+    document.getElementById('workImageUrl').value = '';
+  }
+
   if (work.image_url) {
     document.getElementById('previewImg').src = work.image_url;
     document.getElementById('imagePreview').classList.add('visible');
