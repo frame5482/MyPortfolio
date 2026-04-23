@@ -108,7 +108,6 @@
   background: #FFD700 !important;
   color: #000 !important;
   border-color: #DAA520 !important;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
 }
 
 .admin-work-item.dragging {
