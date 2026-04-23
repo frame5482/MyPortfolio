@@ -72,8 +72,9 @@
               <input type="text" id="workTitle" placeholder="เช่น Dreamy Forest" required>
             </div>
             <div class="form-group">
-              <label for="workDesc">คำอธิบาย</label>
-              <textarea id="workDesc" placeholder="เล่าเกี่ยวกับผลงานนี้..." rows="3"></textarea>
+              <label for="workDesc">📝 คำอธิบายผลงาน (ใส่ได้ละเอียด)</label>
+              <textarea id="workDesc" placeholder="เล่ารายละเอียดเกี่ยวกับผลงานนี้... &#10;เช่น แรงบันดาลใจ, เทคนิคที่ใช้, เครื่องมือ, เวลาที่ใช้ทำ ฯลฯ" rows="8"></textarea>
+              <small style="color: var(--text-lighter); font-size: 0.8rem;">คำอธิบายจะแสดงในหน้ารายละเอียดผลงาน สามารถใส่ได้ยาวๆ ละเอียดๆ</small>
             </div>
             <div class="form-group">
               <label for="workTags">แท็ก (คั่นด้วยคอมมา)</label>
@@ -86,7 +87,7 @@
                 จะเล่นวิดีโออัตโนมัติเมื่อเปิดดู</small>
             </div>
             <div class="form-group">
-              <label>รูปภาพ (เลือกอัปโหลดไฟล์ หรือใส่ลิงก์รูปภาพก็ได้)</label>
+              <label>รูปภาพหลัก (เลือกอัปโหลดไฟล์ หรือใส่ลิงก์รูปภาพก็ได้)</label>
               <input type="url" id="workImageUrl" placeholder="ใส่ลิงก์รูปภาพ (เช่น https://...)" style="margin-bottom: 0.8rem;">
               <div class="file-upload-area" id="fileUploadArea">
                 <div class="upload-icon">📁</div>
@@ -100,6 +101,20 @@
                   onmouseout="this.style.background='rgba(0,0,0,0.6)'">✖</button>
                 <img src="" alt="Preview" id="previewImg" style="border-radius: 8px;">
               </div>
+            </div>
+
+            <!-- Multi-image upload for gallery -->
+            <div class="form-group">
+              <label>🖼 รูปภาพเพิ่มเติม (สำหรับแกลเลอรี่ — ใส่ได้หลายรูป)</label>
+              <small style="color: var(--text-lighter); font-size: 0.8rem; display: block; margin-bottom: 0.6rem;">
+                รูปเหล่านี้จะแสดงเป็นแกลเลอรี่ในหน้ารายละเอียดผลงาน
+              </small>
+              <div class="file-upload-area" id="multiFileUploadArea">
+                <div class="upload-icon">🖼</div>
+                <p>ลากไฟล์มาวาง หรือคลิกเพื่อเลือกหลายรูป</p>
+                <input type="file" id="workImages" accept="image/*" multiple>
+              </div>
+              <div class="multi-image-previews" id="multiImagePreviews"></div>
             </div>
             <div style="display: flex; gap: 10px;">
               <button type="submit" id="submitBtn" class="btn btn-primary" style="flex: 1;">✨ อัปโหลด</button>

@@ -10,6 +10,7 @@ const workSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, default: '' },
   image_url: { type: String, default: '' },
+  images: { type: [String], default: [] },
   video_url: { type: String, default: null },
   tags: { type: String, required: true },
   created_at: { type: Date, default: Date.now }

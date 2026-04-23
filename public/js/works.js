@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavScroll();
   loadTags();
   loadWorks();
-  initLightbox();
+  checkUrlTag();
 });
 
 let allWorks = [];
@@ -31,6 +31,22 @@ function initNavScroll() {
   window.addEventListener('scroll', () => {
     nav.classList.toggle('scrolled', window.scrollY > 50);
   });
+}
+
+// --- Check URL tag param ---
+function checkUrlTag() {
+  const params = new URLSearchParams(window.location.search);
+  const tag = params.get('tag');
+  if (tag) {
+    activeTag = tag;
+    // Will be set active after tags load
+    setTimeout(() => {
+      document.querySelectorAll('.tag-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tag === tag);
+      });
+      renderWorks();
+    }, 500);
+  }
 }
 
 // --- YouTube Helpers ---
@@ -126,10 +142,17 @@ function renderWorks() {
     const thumbSrc = work.image_url || getYouTubeThumbnail(work.video_url);
     const videoBadge = work.video_url ? '<span class="video-badge">▶ Video</span>' : '';
 
+    // Image count badge
+    const totalImages = 1 + (work.images ? work.images.length : 0);
+    const imgCountBadge = totalImages > 1
+      ? `<span class="img-count-badge">🖼 ${totalImages}</span>`
+      : '';
+
     card.innerHTML = `
       <div class="card-media">
         <img src="${thumbSrc}" alt="${work.title}" loading="lazy">
         ${videoBadge}
+        ${imgCountBadge}
       </div>
       <div class="card-body">
         <h3 class="card-title">${work.title}</h3>
@@ -138,79 +161,13 @@ function renderWorks() {
       </div>
     `;
 
-    card.addEventListener('click', () => openLightbox(work));
+    // Navigate to detail page instead of lightbox
+    card.addEventListener('click', () => {
+      window.location.href = `/work-detail?id=${work.id}`;
+    });
+
     grid.appendChild(card);
   });
-}
-
-// --- Lightbox ---
-function initLightbox() {
-  const overlay = document.getElementById('lightbox');
-  const closeBtn = document.getElementById('lightboxClose');
-
-  closeBtn.addEventListener('click', closeLightbox);
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeLightbox();
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeLightbox();
-  });
-}
-
-function openLightbox(work) {
-  const overlay = document.getElementById('lightbox');
-  const mediaContainer = document.getElementById('lightboxMedia');
-  const lightboxImg = document.getElementById('lightboxImg');
-
-  // Clear previous video iframe if exists
-  const oldIframe = mediaContainer.querySelector('iframe');
-  if (oldIframe) oldIframe.remove();
-
-  if (work.video_url) {
-    const videoId = getYouTubeId(work.video_url);
-    if (videoId) {
-      // Hide image, show YouTube embed with autoplay
-      lightboxImg.style.display = 'none';
-      const iframe = document.createElement('iframe');
-      iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-      iframe.setAttribute('frameborder', '0');
-      iframe.setAttribute('allowfullscreen', '');
-      iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
-      iframe.className = 'lightbox-video';
-      mediaContainer.appendChild(iframe);
-    }
-  } else {
-    // Show image
-    lightboxImg.style.display = '';
-    lightboxImg.src = work.image_url;
-    lightboxImg.alt = work.title;
-  }
-
-  document.getElementById('lightboxTitle').textContent = work.title;
-  document.getElementById('lightboxDesc').textContent = work.description || '';
-
-  const tagsContainer = document.getElementById('lightboxTags');
-  const tags = work.tags.split(',').map(t => t.trim());
-  tagsContainer.innerHTML = tags.map(t => `<span class="card-tag">${t}</span>`).join('');
-
-  overlay.classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeLightbox() {
-  const overlay = document.getElementById('lightbox');
-  const mediaContainer = document.getElementById('lightboxMedia');
-
-  // Remove video iframe to stop playback
-  const iframe = mediaContainer.querySelector('iframe');
-  if (iframe) iframe.remove();
-
-  // Restore image display
-  document.getElementById('lightboxImg').style.display = '';
-
-  overlay.classList.remove('active');
-  document.body.style.overflow = '';
 }
 
 // --- "All" tag click ---

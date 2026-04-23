@@ -9,11 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initLogin();
   initUpload();
   initFileUpload();
+  initMultiFileUpload();
   initLogout();
 });
 
 let authToken = localStorage.getItem('artfolio_token') || null;
 let editingId = null;
+let existingImages = []; // For editing — images to keep
 
 // --- Navigation ---
 function initNav() {
@@ -109,7 +111,7 @@ function initLogout() {
   });
 }
 
-// --- File Upload Preview ---
+// --- File Upload Preview (Main Image) ---
 function initFileUpload() {
   const area = document.getElementById('fileUploadArea');
   const input = document.getElementById('workImage');
@@ -164,6 +166,81 @@ function initFileUpload() {
   });
 }
 
+// --- Multi-File Upload (Gallery Images) ---
+let pendingGalleryFiles = []; // New files to upload
+
+function initMultiFileUpload() {
+  const area = document.getElementById('multiFileUploadArea');
+  const input = document.getElementById('workImages');
+
+  input.addEventListener('change', () => {
+    if (input.files.length > 0) {
+      for (const file of input.files) {
+        pendingGalleryFiles.push(file);
+      }
+      renderMultiPreviews();
+    }
+  });
+
+  // Drag & drop
+  area.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    area.classList.add('dragover');
+  });
+  area.addEventListener('dragleave', () => area.classList.remove('dragover'));
+  area.addEventListener('drop', (e) => {
+    e.preventDefault();
+    area.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+      for (const file of e.dataTransfer.files) {
+        if (file.type.startsWith('image/')) {
+          pendingGalleryFiles.push(file);
+        }
+      }
+      renderMultiPreviews();
+    }
+  });
+}
+
+function renderMultiPreviews() {
+  const container = document.getElementById('multiImagePreviews');
+  container.innerHTML = '';
+
+  // Existing images (when editing)
+  existingImages.forEach((url, idx) => {
+    const wrapper = createPreviewItem(url, 'existing', idx);
+    container.appendChild(wrapper);
+  });
+
+  // New files
+  pendingGalleryFiles.forEach((file, idx) => {
+    const url = URL.createObjectURL(file);
+    const wrapper = createPreviewItem(url, 'new', idx, file.name);
+    container.appendChild(wrapper);
+  });
+}
+
+function createPreviewItem(src, type, index, name) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'multi-preview-item';
+  wrapper.innerHTML = `
+    <img src="${src}" alt="Preview ${index + 1}">
+    <button type="button" class="multi-preview-remove" title="ลบรูปนี้">✖</button>
+    <span class="multi-preview-label">${type === 'existing' ? '📌' : '✨'} ${name || (index + 1)}</span>
+  `;
+
+  wrapper.querySelector('.multi-preview-remove').addEventListener('click', () => {
+    if (type === 'existing') {
+      existingImages.splice(index, 1);
+    } else {
+      pendingGalleryFiles.splice(index, 1);
+    }
+    renderMultiPreviews();
+  });
+
+  return wrapper;
+}
+
 // --- Upload Work ---
 function initUpload() {
   const form = document.getElementById('uploadForm');
@@ -185,6 +262,16 @@ function initUpload() {
     if (videoUrl) formData.append('video_url', videoUrl);
     if (externalImageUrl) formData.append('external_image_url', externalImageUrl);
     if (imageFile) formData.append('image', imageFile);
+
+    // Append gallery images
+    pendingGalleryFiles.forEach(file => {
+      formData.append('images', file);
+    });
+
+    // For editing, send list of existing images to keep
+    if (editingId && existingImages.length > 0) {
+      formData.append('keep_existing_images', JSON.stringify(existingImages));
+    }
 
     const method = editingId ? 'PUT' : 'POST';
     const url = editingId ? `/api/works/${editingId}` : '/api/works';
@@ -220,10 +307,13 @@ function initUpload() {
 
 function cancelEdit() {
   editingId = null;
+  existingImages = [];
+  pendingGalleryFiles = [];
   document.getElementById('uploadForm').reset();
   document.getElementById('workImageUrl').value = '';
   document.getElementById('imagePreview').classList.remove('visible');
   document.getElementById('previewImg').src = '';
+  document.getElementById('multiImagePreviews').innerHTML = '';
   document.getElementById('submitBtn').innerHTML = '✨ อัปโหลด';
   document.getElementById('cancelEditBtn').style.display = 'none';
   document.querySelector('.upload-card h2').textContent = '📤 อัปโหลดผลงานใหม่';
@@ -246,12 +336,14 @@ async function loadAdminWorks() {
     container.innerHTML = works.map(work => {
       const thumbSrc = work.image_url || getYouTubeThumbnail(work.video_url);
       const videoBadge = work.video_url ? '<span style="color:var(--peach-dark);font-size:0.75rem;">🎬 YouTube</span>' : '';
+      const imgCount = 1 + (work.images ? work.images.length : 0);
+      const imgBadge = imgCount > 1 ? `<span style="color:var(--lavender-dark);font-size:0.75rem;">🖼 ${imgCount} รูป</span>` : '';
       return `
       <div class="admin-work-item" data-id="${work.id}">
         <img src="${thumbSrc}" alt="${work.title}" class="admin-work-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23f0f0f0\\'/><text y=\\'50%\\' x=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' font-size=\\'40\\'>🖼</text></svg>'">
         <div class="admin-work-info">
           <h3>${work.title}</h3>
-          <p>${work.tags} ${videoBadge}</p>
+          <p>${work.tags} ${videoBadge} ${imgBadge}</p>
         </div>
         <div style="display: flex; gap: 5px;">
           <button class="btn btn-primary btn-sm" onclick="editWork('${work.id}')">✏️ แก้ไข</button>
@@ -288,6 +380,11 @@ function editWork(id) {
   } else {
     document.getElementById('imagePreview').classList.remove('visible');
   }
+
+  // Load existing gallery images
+  existingImages = work.images ? [...work.images] : [];
+  pendingGalleryFiles = [];
+  renderMultiPreviews();
 
   document.getElementById('submitBtn').innerHTML = '💾 บันทึกการแก้ไข';
   document.getElementById('cancelEditBtn').style.display = 'block';
@@ -326,7 +423,7 @@ async function deleteWork(id) {
 // --- YouTube Helpers ---
 function getYouTubeId(url) {
   if (!url) return null;
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\\w-]{11})/);
   return match ? match[1] : null;
 }
 

@@ -50,6 +50,12 @@ const upload = multer({
   }
 });
 
+// Multi-file upload config (up to 10 images)
+const uploadMulti = upload.fields([
+  { name: 'image', maxCount: 1 },
+  { name: 'images', maxCount: 10 }
+]);
+
 // --- Auth ---
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'artfolio123';
 const hashedPassword = bcrypt.hashSync(ADMIN_PASSWORD, 10);
@@ -90,22 +96,43 @@ app.get('/api/works', async (req, res) => {
     const { tag } = req.query;
     let query = {};
     if (tag) {
-      // Tags are stored as comma-separated strings, use regex for finding the tag
       query = { tags: { $regex: new RegExp(`\\\\b${tag}\\\\b`, 'i') } };
     }
     const works = await Work.find(query).sort({ created_at: -1 });
     
-    // Map _id to id for frontend
     const mappedWorks = works.map(w => ({
       id: w._id,
       title: w.title,
       description: w.description,
       image_url: w.image_url,
+      images: w.images || [],
       video_url: w.video_url,
       tags: w.tags,
       created_at: w.created_at
     }));
     res.json(mappedWorks);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get single work by ID
+app.get('/api/works/:id', async (req, res) => {
+  try {
+    const work = await Work.findById(req.params.id);
+    if (!work) {
+      return res.status(404).json({ error: 'Work not found' });
+    }
+    res.json({
+      id: work._id,
+      title: work.title,
+      description: work.description,
+      image_url: work.image_url,
+      images: work.images || [],
+      video_url: work.video_url,
+      tags: work.tags,
+      created_at: work.created_at
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -131,21 +158,45 @@ app.get('/api/tags', async (req, res) => {
 });
 
 // Upload new work (auth required)
-app.post('/api/works', authMiddleware, upload.single('image'), async (req, res) => {
+app.post('/api/works', authMiddleware, (req, res, next) => {
+  uploadMulti(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    next();
+  });
+}, async (req, res) => {
   try {
     const { title, description, tags, video_url, external_image_url } = req.body;
     if (!title || !tags) {
       return res.status(400).json({ error: 'Title and tags are required' });
     }
-    if (!req.file && !video_url && !external_image_url) {
+
+    // Primary image
+    const mainFile = req.files && req.files['image'] ? req.files['image'][0] : null;
+    const image_url = mainFile ? `/uploads/${mainFile.filename}` : (external_image_url || '');
+
+    if (!image_url && !video_url) {
       return res.status(400).json({ error: 'Image or YouTube URL is required' });
     }
-    const image_url = req.file ? `/uploads/${req.file.filename}` : (external_image_url || '');
+
+    // Additional images
+    let images = [];
+    if (req.files && req.files['images']) {
+      images = req.files['images'].map(f => `/uploads/${f.filename}`);
+    }
+    // Parse external image URLs if provided
+    let externalImages = req.body.external_images;
+    if (externalImages) {
+      if (typeof externalImages === 'string') {
+        try { externalImages = JSON.parse(externalImages); } catch(e) { externalImages = [externalImages]; }
+      }
+      images = images.concat(externalImages.filter(u => u && u.trim()));
+    }
     
     const newWork = new Work({
       title,
       description: description || '',
       image_url,
+      images,
       video_url: video_url || null,
       tags
     });
@@ -153,13 +204,23 @@ app.post('/api/works', authMiddleware, upload.single('image'), async (req, res) 
 
     res.json({
       id: newWork._id,
-      title, description, image_url, video_url: video_url || null, tags,
+      title, description, image_url, images, video_url: video_url || null, tags,
       message: 'Work uploaded successfully ✨'
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Helper to delete local upload file
+function deleteLocalFile(fileUrl) {
+  if (fileUrl && fileUrl.startsWith('/uploads/')) {
+    const filePath = path.join(__dirname, fileUrl);
+    if (fs.existsSync(filePath)) {
+      try { fs.unlinkSync(filePath); } catch(e) {}
+    }
+  }
+}
 
 // Delete work (auth required)
 app.delete('/api/works/:id', authMiddleware, async (req, res) => {
@@ -168,12 +229,11 @@ app.delete('/api/works/:id', authMiddleware, async (req, res) => {
     if (!work) {
       return res.status(404).json({ error: 'Work not found' });
     }
-    // Delete image file if it's a local upload
-    if (work.image_url && work.image_url.startsWith('/uploads/')) {
-      const filePath = path.join(__dirname, work.image_url);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+    // Delete main image
+    deleteLocalFile(work.image_url);
+    // Delete additional images
+    if (work.images && work.images.length > 0) {
+      work.images.forEach(img => deleteLocalFile(img));
     }
     await Work.findByIdAndDelete(req.params.id);
     res.json({ message: 'Work deleted successfully' });
@@ -183,7 +243,12 @@ app.delete('/api/works/:id', authMiddleware, async (req, res) => {
 });
 
 // Edit work (auth required)
-app.put('/api/works/:id', authMiddleware, upload.single('image'), async (req, res) => {
+app.put('/api/works/:id', authMiddleware, (req, res, next) => {
+  uploadMulti(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    next();
+  });
+}, async (req, res) => {
   try {
     const work = await Work.findById(req.params.id);
     if (!work) {
@@ -195,25 +260,51 @@ app.put('/api/works/:id', authMiddleware, upload.single('image'), async (req, re
       return res.status(400).json({ error: 'Title and tags are required' });
     }
 
+    // Handle main image
     let new_image_url = work.image_url;
-    if (req.file) {
-      new_image_url = `/uploads/${req.file.filename}`;
-      // Delete old image if it exists and is a local file
-      if (work.image_url && work.image_url.startsWith('/uploads/')) {
-        const oldPath = path.join(__dirname, work.image_url);
-        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-      }
+    const mainFile = req.files && req.files['image'] ? req.files['image'][0] : null;
+    if (mainFile) {
+      new_image_url = `/uploads/${mainFile.filename}`;
+      deleteLocalFile(work.image_url);
     } else if (external_image_url) {
       new_image_url = external_image_url;
-      // Delete old image if it was local
-      if (work.image_url && work.image_url.startsWith('/uploads/')) {
-        const oldPath = path.join(__dirname, work.image_url);
-        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-      }
+      deleteLocalFile(work.image_url);
     }
 
     if (!new_image_url && !video_url && !work.video_url) {
       return res.status(400).json({ error: 'Image or YouTube URL is required' });
+    }
+
+    // Handle additional images
+    let newImages = [];
+    // Check if we should keep existing images
+    let keepExisting = req.body.keep_existing_images;
+    if (keepExisting) {
+      if (typeof keepExisting === 'string') {
+        try { keepExisting = JSON.parse(keepExisting); } catch(e) { keepExisting = [keepExisting]; }
+      }
+      newImages = keepExisting.filter(u => u && u.trim());
+    }
+    // Delete old images that are not in keepExisting
+    if (work.images && work.images.length > 0) {
+      work.images.forEach(img => {
+        if (!newImages.includes(img)) {
+          deleteLocalFile(img);
+        }
+      });
+    }
+    // Add newly uploaded images
+    if (req.files && req.files['images']) {
+      const uploadedImages = req.files['images'].map(f => `/uploads/${f.filename}`);
+      newImages = newImages.concat(uploadedImages);
+    }
+    // Add external image URLs
+    let externalImages = req.body.external_images;
+    if (externalImages) {
+      if (typeof externalImages === 'string') {
+        try { externalImages = JSON.parse(externalImages); } catch(e) { externalImages = [externalImages]; }
+      }
+      newImages = newImages.concat(externalImages.filter(u => u && u.trim()));
     }
 
     work.title = title;
@@ -221,6 +312,7 @@ app.put('/api/works/:id', authMiddleware, upload.single('image'), async (req, re
     work.tags = tags;
     work.video_url = video_url || null;
     work.image_url = new_image_url;
+    work.images = newImages;
     
     await work.save();
 
@@ -228,7 +320,8 @@ app.put('/api/works/:id', authMiddleware, upload.single('image'), async (req, re
       id: work._id,
       title: work.title, 
       description: work.description, 
-      image_url: work.image_url, 
+      image_url: work.image_url,
+      images: work.images,
       video_url: work.video_url, 
       tags: work.tags,
       message: 'Work updated successfully ✨'

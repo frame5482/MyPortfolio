@@ -95,6 +95,22 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
+.img-count-badge {
+  position: absolute;
+  bottom: 0.6rem; left: 0.6rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  background: rgba(0,0,0,0.65);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-family: var(--font-heading);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; gap: 0.25rem;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
 .work-card .card-body { padding: 1rem 1.2rem 1.2rem; }
 
 .work-card .card-title {
@@ -119,59 +135,6 @@
 
 .work-card .card-tag:nth-child(2) { background: var(--mint-light); color: var(--mint-dark); }
 .work-card .card-tag:nth-child(3) { background: var(--peach-light); color: var(--peach-dark); }
-
-/* Lightbox */
-.lightbox-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
-  z-index: 2000; display: flex; align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.3s var(--ease-smooth);
-}
-
-.lightbox-overlay.active { opacity: 1; pointer-events: all; }
-
-.lightbox-content {
-  background: white; border-radius: var(--radius-xl);
-  max-width: 700px; width: 90%; max-height: 90vh; overflow: auto;
-  transform: scale(0.9) translateY(20px);
-  transition: transform 0.4s var(--ease-bounce);
-  box-shadow: 0 25px 80px rgba(0,0,0,0.3);
-}
-
-.lightbox-overlay.active .lightbox-content {
-  transform: scale(1) translateY(0);
-}
-
-.lightbox-content img { width: 100%; border-radius: var(--radius-xl) var(--radius-xl) 0 0; }
-
-.lightbox-media { position: relative; }
-
-.lightbox-video {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  display: block;
-  background: #000;
-}
-
-.lightbox-body { padding: 1.5rem 2rem 2rem; }
-.lightbox-body h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
-.lightbox-body p { color: var(--text-light); line-height: 1.7; margin-bottom: 1rem; }
-.lightbox-body .card-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-
-.lightbox-close {
-  position: absolute; top: 1rem; right: 1rem;
-  width: 40px; height: 40px; border-radius: 50%;
-  background: rgba(255,255,255,0.9); border: none;
-  font-size: 1.3rem; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all var(--transition-fast);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-  z-index: 10;
-}
-
-.lightbox-close:hover { transform: rotate(90deg) scale(1.1); }
 
 @media (max-width: 900px) { .works-grid { column-count: 2; } }
 @media (max-width: 550px) {
