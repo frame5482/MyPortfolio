@@ -282,13 +282,19 @@ function initThumbNav() {
     });
   }
 
-  // Thumbnail Strip Scrolling
+  // Thumbnail Strip Scrolling & Image Navigation
   prevBtn.addEventListener('click', () => {
     container.scrollBy({ left: -240, behavior: 'smooth' });
+    let nextIndex = currentMediaIndex - 1;
+    if (nextIndex < 0) nextIndex = allMedia.length - 1;
+    selectMedia(nextIndex);
   });
 
   nextBtn.addEventListener('click', () => {
     container.scrollBy({ left: 240, behavior: 'smooth' });
+    let nextIndex = currentMediaIndex + 1;
+    if (nextIndex >= allMedia.length) nextIndex = 0;
+    selectMedia(nextIndex);
   });
 
   // Keyboard navigation for gallery
