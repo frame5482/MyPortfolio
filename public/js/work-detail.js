@@ -222,6 +222,8 @@ function renderThumbnails() {
 
 function selectMedia(index) {
   if (index < 0 || index >= allMedia.length) return;
+  
+  const animClass = index > currentMediaIndex ? 'slide-left' : 'slide-right';
   currentMediaIndex = index;
 
   const media = allMedia[index];
@@ -238,6 +240,11 @@ function selectMedia(index) {
     mainImg.style.display = '';
     mainImg.src = media.src;
     mainImg.alt = currentWork?.title || '';
+    
+    // Trigger animation
+    mainImg.classList.remove('slide-left', 'slide-right');
+    void mainImg.offsetWidth; // trigger reflow
+    mainImg.classList.add(animClass);
   }
 
   // Update active thumb
@@ -256,7 +263,26 @@ function initThumbNav() {
   const container = document.getElementById('galleryThumbs');
   const prevBtn = document.getElementById('thumbPrev');
   const nextBtn = document.getElementById('thumbNext');
+  const mainPrevBtn = document.getElementById('mainPrev');
+  const mainNextBtn = document.getElementById('mainNext');
 
+  // Main Image Navigation
+  if (mainPrevBtn) {
+    mainPrevBtn.addEventListener('click', () => {
+      let nextIndex = currentMediaIndex - 1;
+      if (nextIndex < 0) nextIndex = allMedia.length - 1; // loop around
+      selectMedia(nextIndex);
+    });
+  }
+  if (mainNextBtn) {
+    mainNextBtn.addEventListener('click', () => {
+      let nextIndex = currentMediaIndex + 1;
+      if (nextIndex >= allMedia.length) nextIndex = 0; // loop around
+      selectMedia(nextIndex);
+    });
+  }
+
+  // Thumbnail Strip Scrolling
   prevBtn.addEventListener('click', () => {
     container.scrollBy({ left: -240, behavior: 'smooth' });
   });
