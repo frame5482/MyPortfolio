@@ -439,21 +439,29 @@ async function loadAdminWorks() {
       return;
     }
 
-    container.innerHTML = works.map(work => {
+    container.innerHTML = works.map((work, index) => {
       const thumbSrc = work.image_url || getYouTubeThumbnail(work.video_url);
       const videoBadge = work.video_url ? '<span style="color:var(--peach-dark);font-size:0.75rem;">🎬 YouTube</span>' : '';
       const imgCount = 1 + (work.images ? work.images.length : 0);
       const imgBadge = imgCount > 1 ? `<span style="color:var(--lavender-dark);font-size:0.75rem;">🖼 ${imgCount} รูป</span>` : '';
+      const starBtn = `<button class="btn btn-sm ${work.is_starred ? 'btn-warning' : 'btn-secondary'}" onclick="toggleStar('${work.id}')" title="ติดดาวให้อยู่อันดับแรก">⭐</button>`;
+      
+      const moveUpBtn = index > 0 ? `<button class="btn btn-secondary btn-sm" onclick="moveWork(${index}, -1)" title="เลื่อนขึ้น">🔼</button>` : '';
+      const moveDownBtn = index < works.length - 1 ? `<button class="btn btn-secondary btn-sm" onclick="moveWork(${index}, 1)" title="เลื่อนลง">🔽</button>` : '';
+
       return `
-      <div class="admin-work-item" data-id="${work.id}">
+      <div class="admin-work-item" data-id="${work.id}" style="${work.is_starred ? 'border-left: 4px solid gold;' : ''}">
         <img src="${thumbSrc}" alt="${work.title}" class="admin-work-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23f0f0f0\\'/><text y=\\'50%\\' x=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' font-size=\\'40\\'>🖼</text></svg>'">
         <div class="admin-work-info">
           <h3>${work.title}</h3>
           <p>${work.tags} ${videoBadge} ${imgBadge}</p>
         </div>
-        <div style="display: flex; gap: 5px;">
-          <button class="btn btn-primary btn-sm" onclick="editWork('${work.id}')">✏️ แก้ไข</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteWork('${work.id}')">🗑 ลบ</button>
+        <div style="display: flex; gap: 5px; align-items: center;">
+          ${moveUpBtn}
+          ${moveDownBtn}
+          ${starBtn}
+          <button class="btn btn-primary btn-sm" onclick="editWork('${work.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteWork('${work.id}')">🗑</button>
         </div>
       </div>
     `;
@@ -462,6 +470,54 @@ async function loadAdminWorks() {
     console.error('Failed to load works:', err);
   }
 }
+
+// --- Toggle Star ---
+window.toggleStar = async function(id) {
+  try {
+    const res = await fetch(`/api/works/${id}/star`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    if (res.ok) {
+      loadAdminWorks();
+    }
+  } catch (err) {
+    console.error('Toggle star error:', err);
+  }
+};
+
+// --- Move Work Order ---
+window.moveWork = async function(index, direction) {
+  const works = [...window.adminWorks];
+  const targetIndex = index + direction;
+  
+  if (targetIndex < 0 || targetIndex >= works.length) return;
+  
+  // Swap locally
+  const temp = works[index];
+  works[index] = works[targetIndex];
+  works[targetIndex] = temp;
+  
+  // Create ordered array of IDs
+  const orderedIds = works.map(w => w.id);
+  
+  try {
+    const res = await fetch('/api/works/reorder', {
+      method: 'PUT',
+      headers: { 
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ orderedIds })
+    });
+    
+    if (res.ok) {
+      loadAdminWorks();
+    }
+  } catch (err) {
+    console.error('Reorder error:', err);
+  }
+};
 
 // --- Edit Work ---
 function editWork(id) {

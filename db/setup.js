@@ -14,6 +14,8 @@ const workSchema = new mongoose.Schema({
   video_url: { type: String, default: null },
   videos: { type: [String], default: [] },
   tags: { type: String, required: true },
+  is_starred: { type: Boolean, default: false },
+  order: { type: Number, default: 0 },
   created_at: { type: Date, default: Date.now }
 });
 

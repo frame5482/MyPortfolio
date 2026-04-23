@@ -105,7 +105,7 @@ app.get('/api/works', async (req, res) => {
     if (tag) {
       query = { tags: { $regex: new RegExp(`\\\\b${tag}\\\\b`, 'i') } };
     }
-    const works = await Work.find(query).sort({ created_at: -1 });
+    const works = await Work.find(query).sort({ is_starred: -1, order: 1, created_at: -1 });
     
     const mappedWorks = works.map(w => ({
       id: w._id,
@@ -116,6 +116,8 @@ app.get('/api/works', async (req, res) => {
       video_url: w.video_url,
       videos: w.videos || [],
       tags: w.tags,
+      is_starred: w.is_starred || false,
+      order: w.order || 0,
       created_at: w.created_at
     }));
     res.json(mappedWorks);
@@ -140,6 +142,8 @@ app.get('/api/works/:id', async (req, res) => {
       video_url: work.video_url,
       videos: work.videos || [],
       tags: work.tags,
+      is_starred: work.is_starred || false,
+      order: work.order || 0,
       created_at: work.created_at
     });
   } catch (err) {
@@ -228,6 +232,7 @@ app.post('/api/works', authMiddleware, (req, res, next) => {
     res.json({
       id: newWork._id,
       title, description, image_url, images, video_url: video_url || null, videos: parsedVideos, tags,
+      is_starred: false, order: 0,
       message: 'Work uploaded successfully ✨'
     });
   } catch (err) {
@@ -401,6 +406,43 @@ app.get('*', (req, res) => {
 });
 
 // --- Start ---
+// Toggle Star
+app.put('/api/works/:id/star', authMiddleware, async (req, res) => {
+  try {
+    const work = await Work.findById(req.params.id);
+    if (!work) return res.status(404).json({ error: 'Work not found' });
+    work.is_starred = !work.is_starred;
+    await work.save();
+    res.json({ success: true, is_starred: work.is_starred });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Reorder Works
+app.put('/api/works/reorder', authMiddleware, async (req, res) => {
+  try {
+    const { orderedIds } = req.body;
+    if (!Array.isArray(orderedIds)) return res.status(400).json({ error: 'Invalid data' });
+    
+    // Update order for all provided IDs
+    const bulkOps = orderedIds.map((id, index) => ({
+      updateOne: {
+        filter: { _id: id },
+        update: { order: index }
+      }
+    }));
+    
+    if (bulkOps.length > 0) {
+      await Work.bulkWrite(bulkOps);
+    }
+    
+    res.json({ success: true, message: 'Reordered successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`\n🎨 Portfolio server running at http://localhost:${PORT}`);
   console.log(`   📁 Works page: http://localhost:${PORT}/works`);

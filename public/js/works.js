@@ -147,12 +147,16 @@ function renderWorks() {
     const imgCountBadge = totalImages > 1
       ? `<span class="img-count-badge">🖼 ${totalImages}</span>`
       : '';
+      
+    // Star badge
+    const starBadge = work.is_starred ? `<div class="star-badge" title="ผลงานแนะนำ">⭐</div>` : '';
 
     card.innerHTML = `
       <div class="card-media">
         <img src="${thumbSrc}" alt="${work.title}" loading="lazy">
         ${videoBadge}
         ${imgCountBadge}
+        ${starBadge}
       </div>
       <div class="card-body">
         <h3 class="card-title">${work.title}</h3>
