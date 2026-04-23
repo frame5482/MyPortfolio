@@ -446,19 +446,15 @@ async function loadAdminWorks() {
       const imgBadge = imgCount > 1 ? `<span style="color:var(--lavender-dark);font-size:0.75rem;">🖼 ${imgCount} รูป</span>` : '';
       const starBtn = `<button class="btn btn-sm ${work.is_starred ? 'btn-warning' : 'btn-secondary'}" onclick="toggleStar('${work.id}')" title="ติดดาวให้อยู่อันดับแรก">⭐</button>`;
       
-      const moveUpBtn = index > 0 ? `<button class="btn btn-secondary btn-sm" onclick="moveWork(${index}, -1)" title="เลื่อนขึ้น">🔼</button>` : '';
-      const moveDownBtn = index < works.length - 1 ? `<button class="btn btn-secondary btn-sm" onclick="moveWork(${index}, 1)" title="เลื่อนลง">🔽</button>` : '';
-
       return `
-      <div class="admin-work-item" data-id="${work.id}" style="${work.is_starred ? 'border-left: 4px solid gold;' : ''}">
+      <div class="admin-work-item" data-id="${work.id}" style="${work.is_starred ? 'border-left: 4px solid gold;' : ''}" draggable="true" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="drop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondragend="dragEnd(event)">
+        <div style="cursor: grab; padding: 0 10px; font-size: 1.2rem; color: var(--text-lighter);">⋮⋮</div>
         <img src="${thumbSrc}" alt="${work.title}" class="admin-work-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23f0f0f0\\'/><text y=\\'50%\\' x=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' font-size=\\'40\\'>🖼</text></svg>'">
         <div class="admin-work-info">
           <h3>${work.title}</h3>
           <p>${work.tags} ${videoBadge} ${imgBadge}</p>
         </div>
         <div style="display: flex; gap: 5px; align-items: center;">
-          ${moveUpBtn}
-          ${moveDownBtn}
           ${starBtn}
           <button class="btn btn-primary btn-sm" onclick="editWork('${work.id}')">✏️</button>
           <button class="btn btn-danger btn-sm" onclick="deleteWork('${work.id}')">🗑</button>
@@ -486,37 +482,69 @@ window.toggleStar = async function(id) {
   }
 };
 
-// --- Move Work Order ---
-window.moveWork = async function(index, direction) {
-  const works = [...window.adminWorks];
-  const targetIndex = index + direction;
+// --- Drag and Drop Reordering ---
+let dragSource = null;
+
+window.dragStart = function(e) {
+  dragSource = e.currentTarget;
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.classList.add('dragging');
+};
+
+window.dragOver = function(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  return false;
+};
+
+window.dragEnter = function(e) {
+  e.currentTarget.classList.add('drag-over');
+};
+
+window.dragLeave = function(e) {
+  e.currentTarget.classList.remove('drag-over');
+};
+
+window.drop = async function(e) {
+  e.stopPropagation();
+  e.currentTarget.classList.remove('drag-over');
   
-  if (targetIndex < 0 || targetIndex >= works.length) return;
-  
-  // Swap locally
-  const temp = works[index];
-  works[index] = works[targetIndex];
-  works[targetIndex] = temp;
-  
-  // Create ordered array of IDs
-  const orderedIds = works.map(w => w.id);
-  
-  try {
-    const res = await fetch('/api/works/reorder', {
-      method: 'PUT',
-      headers: { 
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ orderedIds })
-    });
+  if (dragSource && dragSource !== e.currentTarget) {
+    const allItems = Array.from(document.querySelectorAll('.admin-work-item'));
+    const sourceIndex = allItems.indexOf(dragSource);
+    const targetIndex = allItems.indexOf(e.currentTarget);
     
-    if (res.ok) {
-      loadAdminWorks();
+    const list = document.getElementById('worksList');
+    if (sourceIndex < targetIndex) {
+      list.insertBefore(dragSource, e.currentTarget.nextSibling);
+    } else {
+      list.insertBefore(dragSource, e.currentTarget);
     }
-  } catch (err) {
-    console.error('Reorder error:', err);
+    
+    // Save order
+    const orderedIds = Array.from(document.querySelectorAll('.admin-work-item')).map(item => item.dataset.id);
+    
+    try {
+      await fetch('/api/works/reorder', {
+        method: 'PUT',
+        headers: { 
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ orderedIds })
+      });
+      // reload to sort starred properly
+      loadAdminWorks();
+    } catch (err) {
+      console.error('Reorder error:', err);
+    }
   }
+  return false;
+};
+
+window.dragEnd = function(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.admin-work-item').forEach(el => el.classList.remove('drag-over'));
 };
 
 // --- Edit Work ---

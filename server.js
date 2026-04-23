@@ -394,18 +394,6 @@ app.put('/api/works/:id', authMiddleware, (req, res, next) => {
   }
 });
 
-// --- SPA Fallback ---
-app.get('*', (req, res) => {
-  // Serve specific HTML pages
-  const page = req.path.slice(1); // remove leading /
-  const htmlPath = path.join(__dirname, 'public', page.endsWith('.html') ? page : `${page}.html`);
-  if (fs.existsSync(htmlPath)) {
-    return res.sendFile(htmlPath);
-  }
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// --- Start ---
 // Toggle Star
 app.put('/api/works/:id/star', authMiddleware, async (req, res) => {
   try {
@@ -425,7 +413,6 @@ app.put('/api/works/reorder', authMiddleware, async (req, res) => {
     const { orderedIds } = req.body;
     if (!Array.isArray(orderedIds)) return res.status(400).json({ error: 'Invalid data' });
     
-    // Update order for all provided IDs
     const bulkOps = orderedIds.map((id, index) => ({
       updateOne: {
         filter: { _id: id },
@@ -436,11 +423,21 @@ app.put('/api/works/reorder', authMiddleware, async (req, res) => {
     if (bulkOps.length > 0) {
       await Work.bulkWrite(bulkOps);
     }
-    
     res.json({ success: true, message: 'Reordered successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// --- SPA Fallback ---
+app.get('*', (req, res) => {
+  // Serve specific HTML pages
+  const page = req.path.slice(1); // remove leading /
+  const htmlPath = path.join(__dirname, 'public', page.endsWith('.html') ? page : `${page}.html`);
+  if (fs.existsSync(htmlPath)) {
+    return res.sendFile(htmlPath);
+  }
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(PORT, () => {

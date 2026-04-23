@@ -89,6 +89,15 @@
   transform: translateX(4px);
 }
 
+.admin-work-item.dragging {
+  opacity: 0.5;
+  background: var(--lavender-light);
+}
+
+.admin-work-item.drag-over {
+  border-top: 4px solid var(--primary);
+}
+
 .admin-work-thumb {
   width: 60px; height: 60px; border-radius: var(--radius-sm);
   object-fit: cover; flex-shrink: 0;
