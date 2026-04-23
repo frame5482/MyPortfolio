@@ -81,6 +81,10 @@
   align-items: start;
 }
 
+.detail-media-col, .detail-info-col {
+  min-width: 0;
+}
+
 /* --- Gallery Main --- */
 .gallery-main {
   position: relative;
