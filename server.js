@@ -108,19 +108,27 @@ app.get('/api/works', async (req, res) => {
     }
     const works = await Work.find(query).sort({ is_starred: -1, order: 1, created_at: -1 });
     
-    const mappedWorks = works.map(w => ({
-      id: w._id,
-      title: w.title,
-      description: w.description,
-      image_url: w.image_url,
-      images: w.images || [],
-      video_url: w.video_url,
-      videos: w.videos || [],
-      tags: w.tags,
-      is_starred: w.is_starred || false,
-      order: w.order || 0,
-      created_at: w.created_at
-    }));
+    const mappedWorks = works.map(w => {
+      const isStarred = w.is_starred === true;
+      const starBtnClass = isStarred ? 'btn-star-active' : 'btn-secondary';
+      const starIcon = isStarred ? '⭐' : '☆';
+
+      return {
+        id: w._id,
+        title: w.title,
+        description: w.description,
+        image_url: w.image_url,
+        images: w.images || [],
+        video_url: w.video_url,
+        videos: w.videos || [],
+        tags: w.tags,
+        is_starred: w.is_starred || false,
+        order: w.order || 0,
+        created_at: w.created_at,
+        starBtnClass,
+        starIcon
+      };
+    });
     res.json(mappedWorks);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -177,8 +185,19 @@ app.put('/api/works/reorder', authMiddleware, async (req, res) => {
     const { orderedIds } = req.body;
     if (!Array.isArray(orderedIds)) return res.status(400).json({ error: 'Invalid data' });
     
-    for (let i = 0; i < orderedIds.length; i++) {
-      await Work.findByIdAndUpdate(orderedIds[i], { order: i });
+    const bulkOps = orderedIds.map((id, index) => {
+      try {
+        return {
+          updateOne: {
+            filter: { _id: new mongoose.Types.ObjectId(id) },
+            update: { $set: { order: index } }
+          }
+        };
+      } catch (e) { return null; }
+    }).filter(Boolean);
+    
+    if (bulkOps.length > 0) {
+      await Work.bulkWrite(bulkOps);
     }
     
     console.log('✅ Reordered works successfully');

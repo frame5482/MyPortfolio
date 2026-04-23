@@ -444,18 +444,19 @@ async function loadAdminWorks() {
       const videoBadge = work.video_url ? '<span style="color:var(--peach-dark);font-size:0.75rem;">🎬 YouTube</span>' : '';
       const imgCount = 1 + (work.images ? work.images.length : 0);
       const imgBadge = imgCount > 1 ? `<span style="color:var(--lavender-dark);font-size:0.75rem;">🖼 ${imgCount} รูป</span>` : '';
-      const starBtn = `<button class="btn btn-sm ${work.is_starred ? 'btn-warning' : 'btn-secondary'}" onclick="toggleStar('${work.id}')" title="ติดดาวให้อยู่อันดับแรก">⭐</button>`;
       
+      const isStarred = work.is_starred === true;
+
       return `
-      <div class="admin-work-item" data-id="${work.id}" style="${work.is_starred ? 'border-left: 4px solid gold;' : ''}" draggable="true" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="drop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondragend="dragEnd(event)">
+      <div class="admin-work-item ${isStarred ? 'starred-item' : ''}" data-id="${work.id}" draggable="true" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="drop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondragend="dragEnd(event)">
         <div class="drag-handle">⋮⋮</div>
         <img src="${thumbSrc}" alt="${work.title}" class="admin-work-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23f0f0f0\\'/><text y=\\'50%\\' x=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' font-size=\\'40\\'>🖼</text></svg>'">
         <div class="admin-work-info">
-          <h3>${work.title}</h3>
+          <h3>${work.title} ${isStarred ? '<span class="star-badge-text">⭐ แนะนำ</span>' : ''}</h3>
           <p>${work.tags} ${videoBadge} ${imgBadge}</p>
         </div>
         <div style="display: flex; gap: 5px; align-items: center;">
-          <button class="btn btn-sm ${work.is_starred ? 'btn-warning' : 'btn-secondary'}" onclick="event.stopPropagation(); toggleStar('${work.id}')" title="ติดดาวให้อยู่อันดับแรก">⭐</button>
+          <button class="btn btn-sm ${work.starBtnClass}" onclick="event.stopPropagation(); toggleStar('${work.id}')" title="ติดดาวให้อยู่อันดับแรก">${work.starIcon}</button>
           <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); editWork('${work.id}')">✏️</button>
           <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteWork('${work.id}')">🗑</button>
         </div>

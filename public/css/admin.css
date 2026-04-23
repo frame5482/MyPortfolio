@@ -89,6 +89,28 @@
   transform: translateX(4px);
 }
 
+.admin-work-item.starred-item {
+  border-left: 5px solid #FFD700;
+  background: rgba(255, 215, 0, 0.05);
+}
+
+.star-badge-text {
+  font-size: 0.75rem;
+  color: #d4af37;
+  font-weight: bold;
+  background: rgba(255, 215, 0, 0.1);
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 5px;
+}
+
+.btn-star-active {
+  background: #FFD700 !important;
+  color: #000 !important;
+  border-color: #DAA520 !important;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
 .admin-work-item.dragging {
   opacity: 0.4;
   background: var(--lavender-light);
