@@ -90,12 +90,31 @@
 }
 
 .admin-work-item.dragging {
-  opacity: 0.5;
+  opacity: 0.4;
   background: var(--lavender-light);
+  border: 2px dashed var(--primary);
 }
 
 .admin-work-item.drag-over {
-  border-top: 4px solid var(--primary);
+  border-top: 4px solid var(--primary) !important;
+  transform: translateY(4px);
+}
+
+.admin-work-item .drag-handle {
+  cursor: grab;
+  padding: 10px;
+  font-size: 1.2rem;
+  color: var(--text-lighter);
+  user-select: none;
+  transition: color 0.2s;
+}
+
+.admin-work-item .drag-handle:hover {
+  color: var(--primary);
+}
+
+.admin-work-item.dragging .drag-handle {
+  cursor: grabbing;
 }
 
 .admin-work-thumb {

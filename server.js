@@ -170,6 +170,45 @@ app.get('/api/tags', async (req, res) => {
   }
 });
 
+// Reorder Works (Must be above /api/works/:id)
+app.put('/api/works/reorder', authMiddleware, async (req, res) => {
+  try {
+    const { orderedIds } = req.body;
+    if (!Array.isArray(orderedIds)) return res.status(400).json({ error: 'Invalid data' });
+    
+    const bulkOps = orderedIds.map((id, index) => ({
+      updateOne: {
+        filter: { _id: id },
+        update: { order: index }
+      }
+    }));
+    
+    if (bulkOps.length > 0) {
+      await Work.bulkWrite(bulkOps);
+    }
+    console.log('✅ Reordered works successfully');
+    res.json({ success: true, message: 'Reordered successfully' });
+  } catch (err) {
+    console.error('❌ Reorder error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Toggle Star (Must be above /api/works/:id)
+app.put('/api/works/:id/star', authMiddleware, async (req, res) => {
+  try {
+    const work = await Work.findById(req.params.id);
+    if (!work) return res.status(404).json({ error: 'Work not found' });
+    work.is_starred = !work.is_starred;
+    await work.save();
+    console.log(`⭐ Toggled star for: ${work.title} (Status: ${work.is_starred})`);
+    res.json({ success: true, is_starred: work.is_starred });
+  } catch (err) {
+    console.error('❌ Star toggle error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Upload new work (auth required)
 app.post('/api/works', authMiddleware, (req, res, next) => {
   uploadMulti(req, res, (err) => {
@@ -389,41 +428,6 @@ app.put('/api/works/:id', authMiddleware, (req, res, next) => {
       tags: work.tags,
       message: 'Work updated successfully ✨'
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Toggle Star
-app.put('/api/works/:id/star', authMiddleware, async (req, res) => {
-  try {
-    const work = await Work.findById(req.params.id);
-    if (!work) return res.status(404).json({ error: 'Work not found' });
-    work.is_starred = !work.is_starred;
-    await work.save();
-    res.json({ success: true, is_starred: work.is_starred });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Reorder Works
-app.put('/api/works/reorder', authMiddleware, async (req, res) => {
-  try {
-    const { orderedIds } = req.body;
-    if (!Array.isArray(orderedIds)) return res.status(400).json({ error: 'Invalid data' });
-    
-    const bulkOps = orderedIds.map((id, index) => ({
-      updateOne: {
-        filter: { _id: id },
-        update: { order: index }
-      }
-    }));
-    
-    if (bulkOps.length > 0) {
-      await Work.bulkWrite(bulkOps);
-    }
-    res.json({ success: true, message: 'Reordered successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

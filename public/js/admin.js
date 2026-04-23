@@ -448,7 +448,7 @@ async function loadAdminWorks() {
       
       return `
       <div class="admin-work-item" data-id="${work.id}" style="${work.is_starred ? 'border-left: 4px solid gold;' : ''}" draggable="true" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="drop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondragend="dragEnd(event)">
-        <div style="cursor: grab; padding: 0 10px; font-size: 1.2rem; color: var(--text-lighter);">⋮⋮</div>
+        <div class="drag-handle">⋮⋮</div>
         <img src="${thumbSrc}" alt="${work.title}" class="admin-work-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23f0f0f0\\'/><text y=\\'50%\\' x=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' font-size=\\'40\\'>🖼</text></svg>'">
         <div class="admin-work-info">
           <h3>${work.title}</h3>
@@ -475,7 +475,11 @@ window.toggleStar = async function(id) {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
     if (res.ok) {
+      console.log(`✅ Star toggled for ${id}`);
       loadAdminWorks();
+    } else {
+      const errData = await res.json();
+      console.error('❌ Star toggle failed:', errData);
     }
   } catch (err) {
     console.error('Toggle star error:', err);
