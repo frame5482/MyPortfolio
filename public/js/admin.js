@@ -325,6 +325,11 @@ function initUpload() {
     const method = editingId ? 'PUT' : 'POST';
     const url = editingId ? `/api/works/${editingId}` : '/api/works';
 
+    const submitBtn = document.getElementById('submitBtn');
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '⏳ กำลังอัปโหลด...';
+    submitBtn.disabled = true;
+
     try {
       const res = await fetch(url, {
         method: method,
@@ -347,7 +352,11 @@ function initUpload() {
       cancelEdit();
       loadAdminWorks();
     } catch (err) {
-      showToast('เกิดข้อผิดพลาด', 'error');
+      console.error('Upload error:', err);
+      showToast('เกิดข้อผิดพลาดในการอัปโหลด', 'error');
+    } finally {
+      submitBtn.innerHTML = originalBtnText;
+      submitBtn.disabled = false;
     }
   });
 
