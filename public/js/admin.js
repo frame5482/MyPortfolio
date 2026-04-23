@@ -331,29 +331,63 @@ function initUpload() {
     submitBtn.disabled = true;
 
     try {
-      const res = await fetch(url, {
-        method: method,
-        headers: { 'Authorization': `Bearer ${authToken}` },
-        body: formData
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, url);
+        xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const loadedMB = (e.loaded / 1024 / 1024).toFixed(1);
+            const totalMB = (e.total / 1024 / 1024).toFixed(1);
+            submitBtn.innerHTML = `⏳ กำลังอัปโหลด... ${loadedMB}/${totalMB}MB`;
+          }
+        };
+
+        xhr.onload = () => {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve(data);
+            } else {
+              if (xhr.status === 401) {
+                authToken = null;
+                localStorage.removeItem('artfolio_token');
+                hideAdminPanel();
+                reject({ error: 'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่' });
+              } else {
+                reject(data);
+              }
+            }
+          } catch(err) {
+            reject({ error: 'เกิดข้อผิดพลาดในการอ่านข้อมูล' });
+          }
+        };
+
+        xhr.onerror = () => reject({ error: 'Network error เกิดข้อผิดพลาดในการเชื่อมต่อ' });
+        xhr.send(formData);
       });
-      const data = await res.json();
-      if (!res.ok) {
-        if (res.status === 401) {
-          authToken = null;
-          localStorage.removeItem('artfolio_token');
-          hideAdminPanel();
-          showToast('Session หมดอายุ กรุณาเข้าสู่ระบบใหม่', 'error');
-          return;
-        }
-        showToast(data.error || 'อัปโหลดล้มเหลว', 'error');
-        return;
+
+      // Upload success - Show checkmarks on previews
+      const previews = document.querySelectorAll('#imagePreview.visible, #multiImagePreviews .gallery-preview-item');
+      previews.forEach(el => {
+        const tick = document.createElement('div');
+        tick.innerHTML = '✅';
+        tick.style.cssText = 'position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:3rem; z-index:10; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5)); animation: cardFadeIn 0.3s ease;';
+        el.style.position = 'relative';
+        el.appendChild(tick);
+      });
+
+      if (previews.length > 0) {
+        await new Promise(r => setTimeout(r, 1000)); // wait 1 sec to let user see ticks
       }
+
       showToast(editingId ? 'อัปเดตผลงานสำเร็จ! ✨' : 'อัปโหลดสำเร็จ! ✨');
       cancelEdit();
       loadAdminWorks();
     } catch (err) {
       console.error('Upload error:', err);
-      showToast('เกิดข้อผิดพลาดในการอัปโหลด', 'error');
+      showToast(err.error || 'เกิดข้อผิดพลาดในการอัปโหลด', 'error');
     } finally {
       submitBtn.innerHTML = originalBtnText;
       submitBtn.disabled = false;
