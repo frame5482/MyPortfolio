@@ -6,6 +6,8 @@ const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { v2: cloudinary } = require('cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,13 +27,18 @@ if (!fs.existsSync(uploadsDir)) {
 }
 app.use('/uploads', express.static(uploadsDir));
 
-// --- Multer Config ---
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadsDir),
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, uniqueSuffix + ext);
+// --- Multer & Cloudinary Config ---
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'demo',
+  api_key: process.env.CLOUDINARY_API_KEY || '1234',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'abcd'
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'web-portfolio',
+    allowedFormats: ['jpeg', 'png', 'jpg', 'gif', 'webp', 'svg']
   }
 });
 
@@ -174,7 +181,7 @@ app.post('/api/works', authMiddleware, (req, res, next) => {
 
     // Primary image
     const mainFile = req.files && req.files['image'] ? req.files['image'][0] : null;
-    const image_url = mainFile ? `/uploads/${mainFile.filename}` : convertDriveLink(external_image_url || '');
+    const image_url = mainFile ? mainFile.path : convertDriveLink(external_image_url || '');
 
     if (!image_url && !video_url) {
       return res.status(400).json({ error: 'Image or YouTube URL is required' });
@@ -183,7 +190,7 @@ app.post('/api/works', authMiddleware, (req, res, next) => {
     // Additional images
     let images = [];
     if (req.files && req.files['images']) {
-      images = req.files['images'].map(f => `/uploads/${f.filename}`);
+      images = req.files['images'].map(f => f.path);
     }
     // Parse external image URLs if provided
     let externalImages = req.body.external_images;
@@ -238,9 +245,19 @@ function convertDriveLink(url) {
   return url;
 }
 
-// Helper to delete local upload file
-function deleteLocalFile(fileUrl) {
-  if (fileUrl && fileUrl.startsWith('/uploads/')) {
+// Helper to delete local or Cloudinary file
+async function deleteLocalFile(fileUrl) {
+  if (fileUrl && fileUrl.includes('res.cloudinary.com')) {
+    try {
+      // Extract public_id from Cloudinary URL (assuming folder web-portfolio/)
+      const parts = fileUrl.split('/');
+      const filename = parts[parts.length - 1];
+      const publicId = 'web-portfolio/' + filename.split('.')[0];
+      await cloudinary.uploader.destroy(publicId);
+    } catch(e) {
+      console.error('Cloudinary delete error:', e);
+    }
+  } else if (fileUrl && fileUrl.startsWith('/uploads/')) {
     const filePath = path.join(__dirname, fileUrl);
     if (fs.existsSync(filePath)) {
       try { fs.unlinkSync(filePath); } catch(e) {}
@@ -290,7 +307,7 @@ app.put('/api/works/:id', authMiddleware, (req, res, next) => {
     let new_image_url = work.image_url;
     const mainFile = req.files && req.files['image'] ? req.files['image'][0] : null;
     if (mainFile) {
-      new_image_url = `/uploads/${mainFile.filename}`;
+      new_image_url = mainFile.path;
       deleteLocalFile(work.image_url);
     } else if (external_image_url) {
       new_image_url = convertDriveLink(external_image_url);
@@ -321,7 +338,7 @@ app.put('/api/works/:id', authMiddleware, (req, res, next) => {
     }
     // Add newly uploaded images
     if (req.files && req.files['images']) {
-      const uploadedImages = req.files['images'].map(f => `/uploads/${f.filename}`);
+      const uploadedImages = req.files['images'].map(f => f.path);
       newImages = newImages.concat(uploadedImages);
     }
     // Add external image URLs
