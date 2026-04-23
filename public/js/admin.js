@@ -455,9 +455,9 @@ async function loadAdminWorks() {
           <p>${work.tags} ${videoBadge} ${imgBadge}</p>
         </div>
         <div style="display: flex; gap: 5px; align-items: center;">
-          ${starBtn}
-          <button class="btn btn-primary btn-sm" onclick="editWork('${work.id}')">✏️</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteWork('${work.id}')">🗑</button>
+          <button class="btn btn-sm ${work.is_starred ? 'btn-warning' : 'btn-secondary'}" onclick="event.stopPropagation(); toggleStar('${work.id}')" title="ติดดาวให้อยู่อันดับแรก">⭐</button>
+          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); editWork('${work.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteWork('${work.id}')">🗑</button>
         </div>
       </div>
     `;

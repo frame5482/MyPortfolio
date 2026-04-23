@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
@@ -176,16 +177,10 @@ app.put('/api/works/reorder', authMiddleware, async (req, res) => {
     const { orderedIds } = req.body;
     if (!Array.isArray(orderedIds)) return res.status(400).json({ error: 'Invalid data' });
     
-    const bulkOps = orderedIds.map((id, index) => ({
-      updateOne: {
-        filter: { _id: id },
-        update: { order: index }
-      }
-    }));
-    
-    if (bulkOps.length > 0) {
-      await Work.bulkWrite(bulkOps);
+    for (let i = 0; i < orderedIds.length; i++) {
+      await Work.findByIdAndUpdate(orderedIds[i], { order: i });
     }
+    
     console.log('✅ Reordered works successfully');
     res.json({ success: true, message: 'Reordered successfully' });
   } catch (err) {
