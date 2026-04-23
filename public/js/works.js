@@ -151,6 +151,8 @@ function renderWorks() {
     // Star badge
     const starBadge = work.is_starred ? `<div class="star-badge" title="ผลงานแนะนำ">⭐</div>` : '';
 
+    const recBadge = work.is_starred ? '<span class="recommended-badge">⭐ แนะนำ</span>' : '';
+
     card.innerHTML = `
       <div class="card-media">
         <img src="${thumbSrc}" alt="${work.title}" loading="lazy">
@@ -159,7 +161,7 @@ function renderWorks() {
         ${starBadge}
       </div>
       <div class="card-body">
-        <h3 class="card-title">${work.title}</h3>
+        <h3 class="card-title">${work.title} ${recBadge}</h3>
         <p class="card-desc">${work.description || ''}</p>
         <div class="card-tags">${tagsHtml}</div>
       </div>
