@@ -221,6 +221,7 @@
   overflow-x: auto;
   scroll-behavior: smooth;
   flex: 1;
+  min-width: 0;
   padding: 4px 0;
   -ms-overflow-style: none;
   scrollbar-width: none;
