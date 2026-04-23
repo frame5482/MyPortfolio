@@ -174,7 +174,7 @@ app.post('/api/works', authMiddleware, (req, res, next) => {
 
     // Primary image
     const mainFile = req.files && req.files['image'] ? req.files['image'][0] : null;
-    const image_url = mainFile ? `/uploads/${mainFile.filename}` : (external_image_url || '');
+    const image_url = mainFile ? `/uploads/${mainFile.filename}` : convertDriveLink(external_image_url || '');
 
     if (!image_url && !video_url) {
       return res.status(400).json({ error: 'Image or YouTube URL is required' });
@@ -193,7 +193,7 @@ app.post('/api/works', authMiddleware, (req, res, next) => {
       } else if (Array.isArray(externalImages)) {
         // already array
       }
-      images = images.concat(externalImages.filter(u => u && u.trim()));
+      images = images.concat(externalImages.map(convertDriveLink).filter(u => u && u.trim()));
     }
 
     // Parse additional videos
@@ -227,6 +227,16 @@ app.post('/api/works', authMiddleware, (req, res, next) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Helper to convert Google Drive links
+function convertDriveLink(url) {
+  if (!url) return url;
+  const match = url.match(/(?:drive\.google\.com\/file\/d\/|drive\.google\.com\/open\?id=)([a-zA-Z0-9_-]+)/);
+  if (match) {
+    return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+  }
+  return url;
+}
 
 // Helper to delete local upload file
 function deleteLocalFile(fileUrl) {
@@ -283,7 +293,7 @@ app.put('/api/works/:id', authMiddleware, (req, res, next) => {
       new_image_url = `/uploads/${mainFile.filename}`;
       deleteLocalFile(work.image_url);
     } else if (external_image_url) {
-      new_image_url = external_image_url;
+      new_image_url = convertDriveLink(external_image_url);
       deleteLocalFile(work.image_url);
     }
 
@@ -322,7 +332,7 @@ app.put('/api/works/:id', authMiddleware, (req, res, next) => {
       } else if (Array.isArray(externalImages)) {
           // already array
       }
-      newImages = newImages.concat(externalImages.filter(u => u && u.trim()));
+      newImages = newImages.concat(externalImages.map(convertDriveLink).filter(u => u && u.trim()));
     }
 
     // Parse additional videos
