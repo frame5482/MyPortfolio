@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initUpload();
   initFileUpload();
   initMultiFileUpload();
+  initDynamicInputs();
   initLogout();
 });
 
@@ -241,12 +242,56 @@ function createPreviewItem(src, type, index, name) {
   return wrapper;
 }
 
+// --- Dynamic Inputs (Videos & External Images) ---
+function initDynamicInputs() {
+  document.getElementById('addVideoBtn').addEventListener('click', () => {
+    addDynamicInput('videoInputsContainer', 'videos', 'work-video-input', 'เช่น https://www.youtube.com/watch?v=xxxxx');
+  });
+
+  document.getElementById('addExternalImageBtn').addEventListener('click', () => {
+    addDynamicInput('externalImageInputsContainer', 'external_images', 'work-ext-image-input', 'ใส่ลิงก์รูปภาพเพิ่มเติม (เช่น https://...)');
+  });
+
+  // Event delegation for remove buttons
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('remove-input-btn')) {
+      e.target.closest('.dynamic-input-row').remove();
+    }
+  });
+}
+
+function addDynamicInput(containerId, name, className, placeholder, value = '') {
+  const container = document.getElementById(containerId);
+  const row = document.createElement('div');
+  row.className = 'dynamic-input-row';
+  row.style.cssText = 'display:flex; gap:10px; margin-bottom:0.5rem; animation: cardFadeIn 0.3s ease;';
+  
+  row.innerHTML = `
+    <input type="url" name="${name}" class="${className}" placeholder="${placeholder}" value="${value}" style="flex:1;">
+    <button type="button" class="btn btn-secondary btn-sm remove-input-btn" style="padding:0 0.8rem; font-size:1.2rem;">✕</button>
+  `;
+  container.appendChild(row);
+}
+
+function clearDynamicInputs(containerId, defaultHtml) {
+  document.getElementById(containerId).innerHTML = defaultHtml;
+}
+
 // --- Upload Work ---
 function initUpload() {
   const form = document.getElementById('uploadForm');
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const videoUrl = document.getElementById('workVideo').value.trim();
+    
+    // Collect videos
+    const videoInputs = document.querySelectorAll('.work-video-input');
+    const videos = Array.from(videoInputs).map(i => i.value.trim()).filter(Boolean);
+    const videoUrl = videos.length > 0 ? videos[0] : ''; // use first video as main video
+
+    // Collect external images
+    const extImgInputs = document.querySelectorAll('.work-ext-image-input');
+    const externalImages = Array.from(extImgInputs).map(i => i.value.trim()).filter(Boolean);
+
     const imageFile = document.getElementById('workImage').files[0];
     const externalImageUrl = document.getElementById('workImageUrl').value.trim();
 
@@ -260,7 +305,11 @@ function initUpload() {
     formData.append('description', document.getElementById('workDesc').value);
     formData.append('tags', document.getElementById('workTags').value);
     if (videoUrl) formData.append('video_url', videoUrl);
+    videos.forEach(v => formData.append('videos', v));
+
     if (externalImageUrl) formData.append('external_image_url', externalImageUrl);
+    externalImages.forEach(img => formData.append('external_images', img));
+    
     if (imageFile) formData.append('image', imageFile);
 
     // Append gallery images
@@ -314,6 +363,20 @@ function cancelEdit() {
   document.getElementById('imagePreview').classList.remove('visible');
   document.getElementById('previewImg').src = '';
   document.getElementById('multiImagePreviews').innerHTML = '';
+  // Reset dynamic inputs
+  clearDynamicInputs('videoInputsContainer', `
+    <div class="dynamic-input-row" style="display:flex; gap:10px; margin-bottom:0.5rem;">
+      <input type="url" name="videos" class="work-video-input" placeholder="เช่น https://www.youtube.com/watch?v=xxxxx" style="flex:1;">
+      <button type="button" class="btn btn-secondary btn-sm remove-input-btn" style="padding:0 0.8rem; font-size:1.2rem; display:none;">✕</button>
+    </div>
+  `);
+  clearDynamicInputs('externalImageInputsContainer', `
+    <div class="dynamic-input-row" style="display:flex; gap:10px; margin-bottom:0.5rem;">
+      <input type="url" name="external_images" class="work-ext-image-input" placeholder="ใส่ลิงก์รูปภาพเพิ่มเติม (เช่น https://...)" style="flex:1;">
+      <button type="button" class="btn btn-secondary btn-sm remove-input-btn" style="padding:0 0.8rem; font-size:1.2rem; display:none;">✕</button>
+    </div>
+  `);
+
   document.getElementById('submitBtn').innerHTML = '✨ อัปโหลด';
   document.getElementById('cancelEditBtn').style.display = 'none';
   document.querySelector('.upload-card h2').textContent = '📤 อัปโหลดผลงานใหม่';
@@ -366,7 +429,26 @@ function editWork(id) {
   document.getElementById('workTitle').value = work.title;
   document.getElementById('workDesc').value = work.description || '';
   document.getElementById('workTags').value = work.tags;
-  document.getElementById('workVideo').value = work.video_url || '';
+  
+  // Populate videos
+  document.getElementById('videoInputsContainer').innerHTML = '';
+  const workVideos = work.videos && work.videos.length > 0 ? work.videos : (work.video_url ? [work.video_url] : []);
+  if (workVideos.length === 0) {
+    addDynamicInput('videoInputsContainer', 'videos', 'work-video-input', 'เช่น https://www.youtube.com/watch?v=xxxxx');
+    document.querySelector('#videoInputsContainer .remove-input-btn').style.display = 'none';
+  } else {
+    workVideos.forEach(v => {
+      addDynamicInput('videoInputsContainer', 'videos', 'work-video-input', 'เช่น https://www.youtube.com/watch?v=xxxxx', v);
+    });
+  }
+
+  // Populate external image links (since images includes both local and external, we extract only external for these inputs, OR we just show them in the multiImagePreviews. Let's just reset the external image inputs because existing images are managed by the multiImagePreviews container)
+  document.getElementById('externalImageInputsContainer').innerHTML = `
+    <div class="dynamic-input-row" style="display:flex; gap:10px; margin-bottom:0.5rem;">
+      <input type="url" name="external_images" class="work-ext-image-input" placeholder="ใส่ลิงก์รูปภาพเพิ่มเติม (เช่น https://...)" style="flex:1;">
+      <button type="button" class="btn btn-secondary btn-sm remove-input-btn" style="padding:0 0.8rem; font-size:1.2rem; display:none;">✕</button>
+    </div>
+  `;
   
   if (work.image_url && work.image_url.startsWith('http')) {
     document.getElementById('workImageUrl').value = work.image_url;

@@ -107,6 +107,7 @@ app.get('/api/works', async (req, res) => {
       image_url: w.image_url,
       images: w.images || [],
       video_url: w.video_url,
+      videos: w.videos || [],
       tags: w.tags,
       created_at: w.created_at
     }));
@@ -130,6 +131,7 @@ app.get('/api/works/:id', async (req, res) => {
       image_url: work.image_url,
       images: work.images || [],
       video_url: work.video_url,
+      videos: work.videos || [],
       tags: work.tags,
       created_at: work.created_at
     });
@@ -188,9 +190,22 @@ app.post('/api/works', authMiddleware, (req, res, next) => {
     if (externalImages) {
       if (typeof externalImages === 'string') {
         try { externalImages = JSON.parse(externalImages); } catch(e) { externalImages = [externalImages]; }
+      } else if (Array.isArray(externalImages)) {
+        // already array
       }
       images = images.concat(externalImages.filter(u => u && u.trim()));
     }
+
+    // Parse additional videos
+    let parsedVideos = [];
+    if (req.body.videos) {
+      if (typeof req.body.videos === 'string') {
+        try { parsedVideos = JSON.parse(req.body.videos); } catch(e) { parsedVideos = [req.body.videos]; }
+      } else if (Array.isArray(req.body.videos)) {
+        parsedVideos = req.body.videos;
+      }
+    }
+    parsedVideos = parsedVideos.filter(u => u && u.trim());
     
     const newWork = new Work({
       title,
@@ -198,13 +213,14 @@ app.post('/api/works', authMiddleware, (req, res, next) => {
       image_url,
       images,
       video_url: video_url || null,
+      videos: parsedVideos,
       tags
     });
     await newWork.save();
 
     res.json({
       id: newWork._id,
-      title, description, image_url, images, video_url: video_url || null, tags,
+      title, description, image_url, images, video_url: video_url || null, videos: parsedVideos, tags,
       message: 'Work uploaded successfully ✨'
     });
   } catch (err) {
@@ -303,9 +319,22 @@ app.put('/api/works/:id', authMiddleware, (req, res, next) => {
     if (externalImages) {
       if (typeof externalImages === 'string') {
         try { externalImages = JSON.parse(externalImages); } catch(e) { externalImages = [externalImages]; }
+      } else if (Array.isArray(externalImages)) {
+          // already array
       }
       newImages = newImages.concat(externalImages.filter(u => u && u.trim()));
     }
+
+    // Parse additional videos
+    let parsedVideos = [];
+    if (req.body.videos) {
+      if (typeof req.body.videos === 'string') {
+        try { parsedVideos = JSON.parse(req.body.videos); } catch(e) { parsedVideos = [req.body.videos]; }
+      } else if (Array.isArray(req.body.videos)) {
+        parsedVideos = req.body.videos;
+      }
+    }
+    parsedVideos = parsedVideos.filter(u => u && u.trim());
 
     work.title = title;
     work.description = description || '';
@@ -313,6 +342,7 @@ app.put('/api/works/:id', authMiddleware, (req, res, next) => {
     work.video_url = video_url || null;
     work.image_url = new_image_url;
     work.images = newImages;
+    work.videos = parsedVideos;
     
     await work.save();
 
@@ -323,6 +353,7 @@ app.put('/api/works/:id', authMiddleware, (req, res, next) => {
       image_url: work.image_url,
       images: work.images,
       video_url: work.video_url, 
+      videos: work.videos,
       tags: work.tags,
       message: 'Work updated successfully ✨'
     });

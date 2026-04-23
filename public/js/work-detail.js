@@ -99,18 +99,23 @@ function renderDetail() {
     allMedia.push({ type: 'image', src: work.image_url, thumb: work.image_url });
   }
 
-  // Video
-  if (work.video_url) {
-    const videoId = getYouTubeId(work.video_url);
+  // Videos
+  const videosToProcess = work.videos && work.videos.length > 0 ? [...work.videos] : [];
+  if (work.video_url && !videosToProcess.includes(work.video_url)) {
+    videosToProcess.unshift(work.video_url);
+  }
+
+  videosToProcess.forEach(vUrl => {
+    const videoId = getYouTubeId(vUrl);
     if (videoId) {
       allMedia.push({
         type: 'video',
         src: `https://www.youtube.com/embed/${videoId}?rel=0`,
-        thumb: getYouTubeThumbnail(work.video_url),
-        videoUrl: work.video_url
+        thumb: getYouTubeThumbnail(vUrl),
+        videoUrl: vUrl
       });
     }
-  }
+  });
 
   // Additional images
   if (work.images && work.images.length > 0) {

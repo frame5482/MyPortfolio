@@ -12,6 +12,7 @@ const workSchema = new mongoose.Schema({
   image_url: { type: String, default: '' },
   images: { type: [String], default: [] },
   video_url: { type: String, default: null },
+  videos: { type: [String], default: [] },
   tags: { type: String, required: true },
   created_at: { type: Date, default: Date.now }
 });

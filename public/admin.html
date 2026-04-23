@@ -81,10 +81,15 @@
               <input type="text" id="workTags" placeholder="เช่น illustration, character, fantasy" required>
             </div>
             <div class="form-group">
-              <label for="workVideo">🎬 YouTube URL (ไม่บังคับ)</label>
-              <input type="url" id="workVideo" placeholder="เช่น https://www.youtube.com/watch?v=xxxxx">
-              <small style="color: var(--text-lighter); font-size: 0.8rem;">ใส่ลิงก์ YouTube
-                จะเล่นวิดีโออัตโนมัติเมื่อเปิดดู</small>
+              <label>🎬 YouTube URL (ใส่ได้หลายคลิป)</label>
+              <small style="color: var(--text-lighter); font-size: 0.8rem; display: block; margin-bottom: 0.6rem;">ใส่ลิงก์ YouTube จะเล่นวิดีโออัตโนมัติเมื่อเปิดดู</small>
+              <div id="videoInputsContainer">
+                <div class="dynamic-input-row" style="display:flex; gap:10px; margin-bottom:0.5rem;">
+                  <input type="url" name="videos" class="work-video-input" placeholder="เช่น https://www.youtube.com/watch?v=xxxxx" style="flex:1;">
+                  <button type="button" class="btn btn-secondary btn-sm remove-input-btn" style="padding:0 0.8rem; font-size:1.2rem; display:none;">✕</button>
+                </div>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" id="addVideoBtn" style="margin-top:0.3rem; background:var(--bg-alt);">+ เพิ่มวิดีโอ YouTube</button>
             </div>
             <div class="form-group">
               <label>รูปภาพหลัก (เลือกอัปโหลดไฟล์ หรือใส่ลิงก์รูปภาพก็ได้)</label>
@@ -105,10 +110,20 @@
 
             <!-- Multi-image upload for gallery -->
             <div class="form-group">
-              <label>🖼 รูปภาพเพิ่มเติม (สำหรับแกลเลอรี่ — ใส่ได้หลายรูป)</label>
+              <label>🖼 รูปภาพเพิ่มเติม (อัปโหลดไฟล์ / ใส่ลิงก์หลายรูป)</label>
               <small style="color: var(--text-lighter); font-size: 0.8rem; display: block; margin-bottom: 0.6rem;">
                 รูปเหล่านี้จะแสดงเป็นแกลเลอรี่ในหน้ารายละเอียดผลงาน
               </small>
+              
+              <!-- Multiple External Links -->
+              <div id="externalImageInputsContainer" style="margin-bottom: 1rem;">
+                <div class="dynamic-input-row" style="display:flex; gap:10px; margin-bottom:0.5rem;">
+                  <input type="url" name="external_images" class="work-ext-image-input" placeholder="ใส่ลิงก์รูปภาพเพิ่มเติม (เช่น https://...)" style="flex:1;">
+                  <button type="button" class="btn btn-secondary btn-sm remove-input-btn" style="padding:0 0.8rem; font-size:1.2rem; display:none;">✕</button>
+                </div>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" id="addExternalImageBtn" style="margin-bottom:1rem; background:var(--bg-alt);">+ เพิ่มลิงก์รูปภาพ</button>
+
               <div class="file-upload-area" id="multiFileUploadArea">
                 <div class="upload-icon">🖼</div>
                 <p>ลากไฟล์มาวาง หรือคลิกเพื่อเลือกหลายรูป</p>
