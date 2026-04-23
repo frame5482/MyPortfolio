@@ -391,8 +391,8 @@ async function loadAdminWorks() {
 
     window.adminWorks = works; // Store globally for editing
 
-    if (works.length === 0) {
-      container.innerHTML = '<div class="empty-state"><div class="emoji">📭</div><p>ยังไม่มีผลงาน</p></div>';
+    if (!Array.isArray(works) || works.length === 0) {
+      container.innerHTML = '<div class="empty-state"><div class="emoji">📭</div><p>ยังไม่มีผลงาน (หรือเชื่อมต่อฐานข้อมูลไม่ได้)</p></div>';
       return;
     }
 
