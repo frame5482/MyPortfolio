@@ -537,7 +537,6 @@
   backdrop-filter: blur(4px);
 }
 
-/* --- Responsive --- */
 @media (max-width: 900px) {
   .detail-layout {
     grid-template-columns: 1fr;
@@ -561,25 +560,52 @@
   }
 }
 
+@media (max-width: 768px) {
+  /* Make main image arrows visible on mobile (no hover) */
+  .gallery-main-nav {
+    opacity: 0.7;
+    width: 32px;
+    height: 48px;
+    font-size: 1.8rem;
+  }
+  .gallery-main-nav.prev { left: 5px; }
+  .gallery-main-nav.next { right: 5px; }
+  
+  .gallery-fullscreen-btn {
+    opacity: 0.8;
+    bottom: 8px;
+    right: 8px;
+  }
+}
+
 @media (max-width: 550px) {
   .gallery-thumb {
-    width: 90px;
-    height: 50px;
+    width: 80px;
+    height: 45px;
   }
 
   .gallery-thumb-nav {
     width: 24px;
-    height: 50px;
+    height: 45px;
     font-size: 1.1rem;
   }
 
   .detail-title {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
   }
 
   .fullscreen-nav {
-    width: 40px;
-    height: 60px;
+    width: 35px;
+    height: 50px;
     font-size: 1.5rem;
+  }
+
+  .detail-meta {
+    font-size: 0.75rem;
+  }
+
+  .detail-full-desc {
+    padding: 1.2rem 1.2rem 1.5rem;
   }
 }
