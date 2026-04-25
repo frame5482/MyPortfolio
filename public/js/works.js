@@ -144,6 +144,9 @@ function renderWorks() {
     const title = work[`title_${lang}`] || work.title;
     const desc = work[`description_${lang}`] || work.description;
 
+    const tags = work.tags.split(',').map(t => t.trim());
+    const tagsHtml = tags.map(t => `<span class="card-tag">${t}</span>`).join('');
+
     const thumbSrc = work.image_url || getYouTubeThumbnail(work.video_url);
     const videoBadge = work.video_url ? '<span class="video-badge">▶ Video</span>' : '';
 
