@@ -22,6 +22,11 @@ window.addEventListener('languageChanged', () => {
   loadAdminWorks();
 });
 
+// --- Cropper State ---
+let cropper = null;
+let croppedBlob = null;
+let originalFileName = "";
+
 // --- Navigation ---
 function initNav() {
   const toggle = document.getElementById('navToggle');
@@ -124,13 +129,8 @@ function initFileUpload() {
   const previewImg = document.getElementById('previewImg');
 
   input.addEventListener('change', () => {
-    if (input.files[0]) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        previewImg.src = e.target.result;
-        preview.classList.add('visible');
-      };
-      reader.readAsDataURL(input.files[0]);
+    if (input.files && input.files[0]) {
+      openCropper(input.files[0]);
     }
   });
 
@@ -138,6 +138,7 @@ function initFileUpload() {
   if (removeImgBtn) {
     removeImgBtn.addEventListener('click', () => {
       input.value = '';
+      croppedBlob = null;
       document.getElementById('workImageUrl').value = '';
       previewImg.src = '';
       preview.classList.remove('visible');
@@ -206,6 +207,56 @@ function initMultiFileUpload() {
     }
   });
 }
+
+// --- Cropper Functions ---
+function openCropper(file) {
+  originalFileName = file.name;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const modal = document.getElementById('cropperModal');
+    const image = document.getElementById('cropperImage');
+    image.src = e.target.result;
+    modal.style.display = 'flex';
+
+    if (cropper) cropper.destroy();
+    cropper = new Cropper(image, {
+      aspectRatio: 16 / 9,
+      viewMode: 2,
+      background: false
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
+function closeCropper() {
+  document.getElementById('cropperModal').style.display = 'none';
+  if (cropper) cropper.destroy();
+  // If we canceled and don't have a cropped blob yet, clear the input
+  if (!croppedBlob) {
+    document.getElementById('workImage').value = '';
+  }
+}
+
+function applyCrop() {
+  if (!cropper) return;
+  const canvas = cropper.getCroppedCanvas({
+    width: 1920, // High quality limit
+    height: 1080
+  });
+
+  canvas.toBlob((blob) => {
+    croppedBlob = blob;
+    const previewImg = document.getElementById('previewImg');
+    const preview = document.getElementById('imagePreview');
+    previewImg.src = URL.createObjectURL(blob);
+    preview.classList.add('visible');
+    closeCropper();
+  }, 'image/jpeg', 0.9);
+}
+
+window.closeCropper = closeCropper;
+window.applyCrop = applyCrop;
+
 
 function renderMultiPreviews() {
   const container = document.getElementById('multiImagePreviews');
@@ -320,7 +371,11 @@ function initUpload() {
     if (externalImageUrl) formData.append('external_image_url', externalImageUrl);
     externalImages.forEach(img => formData.append('external_images', img));
     
-    if (imageFile) formData.append('image', imageFile);
+    if (croppedBlob) {
+      formData.append('image', croppedBlob, originalFileName || 'cropped_image.jpg');
+    } else if (imageFile) {
+      formData.append('image', imageFile);
+    }
 
     // Append gallery images
     pendingGalleryFiles.forEach(file => {
@@ -417,6 +472,7 @@ function cancelEdit() {
   document.getElementById('workDescTh').value = '';
   document.getElementById('workDescEn').value = '';
   document.getElementById('workDescJp').value = '';
+  croppedBlob = null;
   document.getElementById('imagePreview').classList.remove('visible');
   document.getElementById('previewImg').src = '';
   document.getElementById('multiImagePreviews').innerHTML = '';

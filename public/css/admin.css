@@ -139,8 +139,11 @@
 }
 
 .admin-work-thumb {
-  width: 60px; height: 60px; border-radius: var(--radius-sm);
+  width: 100px; 
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
   object-fit: cover; flex-shrink: 0;
+  background: var(--bg-alt);
 }
 
 .admin-work-info { flex: 1; min-width: 0; }
@@ -305,4 +308,80 @@
   background: white;
   box-shadow: 0 0 0 4px rgba(197, 163, 255, 0.1);
 }
+
+/* --- Image Cropper Modal (NO TRANSPARENCY) --- */
+.xeno-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(200, 200, 200, 0.6) !important; /* Light grey overlay */
+  z-index: 99999;
+  padding: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.xeno-modal-content {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.4);
+  border: 1px solid #ccc;
+  overflow: hidden;
+}
+
+.xeno-modal-header {
+  background-color: #ffffff !important;
+  padding: 20px 30px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.xeno-modal-header h3 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  color: #1a1a1a;
+}
+
+.xeno-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #999;
+}
+
+.xeno-modal-body {
+  padding: 20px;
+  background-color: #f5f5f5 !important;
+}
+
+.xeno-modal-img-area {
+  max-height: 60vh;
+  overflow: hidden;
+  border-radius: 12px;
+  background-color: #000000 !important;
+  display: block;
+}
+
+.xeno-modal-footer {
+  padding: 20px 30px;
+  background-color: #ffffff !important;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+
 

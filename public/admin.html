@@ -11,6 +11,9 @@
   <link rel="stylesheet" href="/css/global.css">
   <link rel="stylesheet" href="/css/admin.css">
   <script src="/js/i18n.js"></script>
+  <!-- Cropper.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 </head>
 
 <body>
@@ -195,6 +198,28 @@
   </footer>
 
   <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Image Cropper Modal (NO TRANSPARENCY) -->
+  <div class="xeno-modal-overlay" id="cropperModal">
+    <div class="xeno-modal-content">
+      <div class="xeno-modal-header">
+        <h3>✂️ Crop Image (16:9)</h3>
+        <button type="button" class="xeno-modal-close" onclick="closeCropper()">✕</button>
+      </div>
+      
+      <div class="xeno-modal-body">
+        <div class="xeno-modal-img-area">
+          <img id="cropperImage" src="">
+        </div>
+      </div>
+
+      <div class="xeno-modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeCropper()" style="min-width:120px;">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="applyCrop()" style="min-width:160px;">✨ Crop & Save</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     function switchDescTab(lang) {
       document.querySelectorAll('.desc-tab').forEach(el => el.style.display = 'none');

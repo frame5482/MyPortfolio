@@ -237,8 +237,8 @@
 
 .gallery-thumb {
   flex-shrink: 0;
-  width: 116px;
-  height: 65px;
+  width: 120px;
+  aspect-ratio: 16 / 9;
   border-radius: 6px;
   overflow: hidden;
   cursor: pointer;
