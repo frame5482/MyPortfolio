@@ -18,6 +18,10 @@ let authToken = localStorage.getItem('artfolio_token') || null;
 let editingId = null;
 let existingImages = []; // For editing — images to keep
 
+window.addEventListener('languageChanged', () => {
+  loadAdminWorks();
+});
+
 // --- Navigation ---
 function initNav() {
   const toggle = document.getElementById('navToggle');
@@ -302,7 +306,13 @@ function initUpload() {
 
     const formData = new FormData();
     formData.append('title', document.getElementById('workTitle').value);
-    formData.append('description', document.getElementById('workDesc').value);
+    formData.append('title_th', document.getElementById('workTitleTh').value);
+    formData.append('title_en', document.getElementById('workTitleEn').value);
+    formData.append('title_jp', document.getElementById('workTitleJp').value);
+    formData.append('description', document.getElementById('workTitle').value); // fallback
+    formData.append('description_th', document.getElementById('workDescTh').value);
+    formData.append('description_en', document.getElementById('workDescEn').value);
+    formData.append('description_jp', document.getElementById('workDescJp').value);
     formData.append('tags', document.getElementById('workTags').value);
     if (videoUrl) formData.append('video_url', videoUrl);
     videos.forEach(v => formData.append('videos', v));
@@ -401,8 +411,12 @@ function cancelEdit() {
   editingId = null;
   existingImages = [];
   pendingGalleryFiles = [];
-  document.getElementById('uploadForm').reset();
-  document.getElementById('workImageUrl').value = '';
+  document.getElementById('workTitleTh').value = '';
+  document.getElementById('workTitleEn').value = '';
+  document.getElementById('workTitleJp').value = '';
+  document.getElementById('workDescTh').value = '';
+  document.getElementById('workDescEn').value = '';
+  document.getElementById('workDescJp').value = '';
   document.getElementById('imagePreview').classList.remove('visible');
   document.getElementById('previewImg').src = '';
   document.getElementById('multiImagePreviews').innerHTML = '';
@@ -446,13 +460,14 @@ async function loadAdminWorks() {
       const imgBadge = imgCount > 1 ? `<span style="color:var(--lavender-dark);font-size:0.75rem;">🖼 ${imgCount} images</span>` : '';
       
       const isStarred = work.is_starred === true;
+      const title = work[`title_${getCurrentLang()}`] || work.title;
 
       return `
       <div class="admin-work-item ${isStarred ? 'starred-item' : ''}" data-id="${work.id}" draggable="true" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="drop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondragend="dragEnd(event)">
         <div class="drag-handle">⋮⋮</div>
-        <img src="${thumbSrc}" alt="${work.title}" class="admin-work-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23f0f0f0\\'/><text y=\\'50%\\' x=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' font-size=\\'40\\'>🖼</text></svg>'">
+        <img src="${thumbSrc}" alt="${title}" class="admin-work-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23f0f0f0\\'/><text y=\\'50%\\' x=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' font-size=\\'40\\'>🖼</text></svg>'">
         <div class="admin-work-info">
-          <h3>${work.title} ${isStarred ? '<span class="star-badge-text">⭐ Featured</span>' : ''}</h3>
+          <h3>${title} ${isStarred ? '<span class="star-badge-text">⭐ Featured</span>' : ''}</h3>
           <p>${work.tags} ${videoBadge} ${imgBadge}</p>
         </div>
         <div style="display: flex; gap: 5px; align-items: center;">
@@ -559,7 +574,12 @@ function editWork(id) {
 
   editingId = id;
   document.getElementById('workTitle').value = work.title;
-  document.getElementById('workDesc').value = work.description || '';
+  document.getElementById('workTitleTh').value = work.title_th || '';
+  document.getElementById('workTitleEn').value = work.title_en || '';
+  document.getElementById('workTitleJp').value = work.title_jp || '';
+  document.getElementById('workDescTh').value = work.description_th || '';
+  document.getElementById('workDescEn').value = work.description_en || '';
+  document.getElementById('workDescJp').value = work.description_jp || '';
   document.getElementById('workTags').value = work.tags;
   
   // Populate videos

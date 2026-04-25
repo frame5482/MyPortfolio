@@ -13,6 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
 let allWorks = [];
 let activeTag = 'all';
 
+// Handle language change
+window.addEventListener('languageChanged', () => {
+  renderWorks();
+});
+
 // --- Navigation ---
 function initNav() {
   const toggle = document.getElementById('navToggle');
@@ -135,10 +140,10 @@ function renderWorks() {
     card.className = 'work-card';
     card.style.animationDelay = `${i * 0.08}s`;
 
-    const tags = work.tags.split(',').map(t => t.trim());
-    const tagsHtml = tags.map(t => `<span class="card-tag">${t}</span>`).join('');
+    const lang = getCurrentLang();
+    const title = work[`title_${lang}`] || work.title;
+    const desc = work[`description_${lang}`] || work.description;
 
-    // Determine thumbnail: uploaded image > YouTube thumbnail
     const thumbSrc = work.image_url || getYouTubeThumbnail(work.video_url);
     const videoBadge = work.video_url ? '<span class="video-badge">▶ Video</span>' : '';
 
@@ -155,14 +160,14 @@ function renderWorks() {
 
     card.innerHTML = `
       <div class="card-media">
-        <img src="${thumbSrc}" alt="${work.title}" loading="lazy">
+        <img src="${thumbSrc}" alt="${title}" loading="lazy">
         ${videoBadge}
         ${imgCountBadge}
         ${starBadge}
       </div>
       <div class="card-body">
-        <h3 class="card-title">${work.title} ${recBadge}</h3>
-        <p class="card-desc">${work.description || ''}</p>
+        <h3 class="card-title">${title} ${recBadge}</h3>
+        <p class="card-desc">${desc || ''}</p>
         <div class="card-tags">${tagsHtml}</div>
       </div>
     `;

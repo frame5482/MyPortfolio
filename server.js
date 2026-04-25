@@ -116,7 +116,13 @@ app.get('/api/works', async (req, res) => {
       return {
         id: w._id,
         title: w.title,
+        title_th: w.title_th || '',
+        title_en: w.title_en || '',
+        title_jp: w.title_jp || '',
         description: w.description,
+        description_th: w.description_th || '',
+        description_en: w.description_en || '',
+        description_jp: w.description_jp || '',
         image_url: w.image_url,
         images: w.images || [],
         video_url: w.video_url,
@@ -145,7 +151,13 @@ app.get('/api/works/:id', async (req, res) => {
     res.json({
       id: work._id,
       title: work.title,
+      title_th: work.title_th || '',
+      title_en: work.title_en || '',
+      title_jp: work.title_jp || '',
       description: work.description,
+      description_th: work.description_th || '',
+      description_en: work.description_en || '',
+      description_jp: work.description_jp || '',
       image_url: work.image_url,
       images: work.images || [],
       video_url: work.video_url,
@@ -231,7 +243,11 @@ app.post('/api/works', authMiddleware, (req, res, next) => {
   });
 }, async (req, res) => {
   try {
-    const { title, description, tags, video_url, external_image_url } = req.body;
+    const { 
+      title, title_th, title_en, title_jp,
+      description, description_th, description_en, description_jp,
+      tags, video_url, external_image_url 
+    } = req.body;
     if (!title || !tags) {
       return res.status(400).json({ error: 'Title and tags are required' });
     }
@@ -273,7 +289,13 @@ app.post('/api/works', authMiddleware, (req, res, next) => {
     
     const newWork = new Work({
       title,
+      title_th: title_th || '',
+      title_en: title_en || '',
+      title_jp: title_jp || '',
       description: description || '',
+      description_th: description_th || '',
+      description_en: description_en || '',
+      description_jp: description_jp || '',
       image_url,
       images,
       video_url: video_url || null,
@@ -356,7 +378,11 @@ app.put('/api/works/:id', authMiddleware, (req, res, next) => {
       return res.status(404).json({ error: 'Work not found' });
     }
 
-    const { title, description, tags, video_url, external_image_url } = req.body;
+    const { 
+      title, title_th, title_en, title_jp,
+      description, description_th, description_en, description_jp,
+      tags, video_url, external_image_url 
+    } = req.body;
     if (!title || !tags) {
       return res.status(400).json({ error: 'Title and tags are required' });
     }
@@ -422,7 +448,13 @@ app.put('/api/works/:id', authMiddleware, (req, res, next) => {
     parsedVideos = parsedVideos.filter(u => u && u.trim());
 
     work.title = title;
+    work.title_th = title_th || '';
+    work.title_en = title_en || '';
+    work.title_jp = title_jp || '';
     work.description = description || '';
+    work.description_th = description_th || '';
+    work.description_en = description_en || '';
+    work.description_jp = description_jp || '';
     work.tags = tags;
     work.video_url = video_url || null;
     work.image_url = new_image_url;

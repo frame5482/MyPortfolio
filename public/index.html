@@ -11,6 +11,7 @@
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
   <link rel="stylesheet" href="/css/global.css">
   <link rel="stylesheet" href="/css/index.css">
+  <script src="/js/i18n.js"></script>
 </head>
 
 <body>
@@ -34,11 +35,18 @@
     <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
       <span></span><span></span><span></span>
     </button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="/" class="active">✦ Home</a></li>
-      <li><a href="/works">🖼 Works</a></li>
-      <li><a href="/admin"> IframeXeno</a></li>
-    </ul>
+    <div style="display: flex; align-items: center;">
+      <div class="lang-switcher">
+        <button class="lang-btn" data-lang="th" onclick="setLanguage('th')">TH</button>
+        <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+        <button class="lang-btn" data-lang="jp" onclick="setLanguage('jp')">JP</button>
+      </div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/" class="active" data-i18n="nav_home">✦ Home</a></li>
+        <li><a href="/works" data-i18n="nav_works">🖼 Works</a></li>
+        <li><a href="/admin" data-i18n="nav_admin"> Admin </a></li>
+      </ul>
+    </div>
   </nav>
 
   <!-- Main Content -->
@@ -66,13 +74,13 @@
       <h1 class="hero-name">Amonphan Jamratsri</h1>
       <h3 class="hero-name">IframeXeno</h3>
 
-      <p class="hero-title">GameDev · Illustration · 3D Artist · VFX Artist ✨</p>
-      <p class="hero-bio">
+      <p class="hero-title" data-i18n="hero_title">GameDev · Illustration · 3D Artist · VFX Artist ✨</p>
+      <p class="hero-bio" data-i18n="hero_bio">
         Hello! Welcome to my portfolio. If you're looking for a 3D Artist or VFX Artist, feel free to contact me.
       </p>
 
       <div class="hero-buttons">
-        <a href="/works" class="btn btn-primary btn-hero-main"> 🖼 View Works </a>
+        <a href="/works" class="btn btn-primary btn-hero-main" data-i18n="btn_view_works"> 🖼 View Works </a>
 
       </div>
     </section>
@@ -80,25 +88,25 @@
     <!-- Skills Section -->
     <section class="skills-section reveal" id="skills">
       <div class="section-title">
-        <h2> What I do </h2>
-        <p>My Skill</p>
+        <h2 data-i18n="section_what_i_do"> What I do </h2>
+        <p data-i18n="section_my_skill">My Skill</p>
       </div>
 
       <div class="skills-grid">
         <div class="skill-card glass-card">
           <span class="skill-icon">🎨</span>
-          <h3>Illustration</h3>
-          <p>Digital illustration, from characters and scenes to concept art.</p>
+          <h3 data-i18n="skill_ill_title">Illustration</h3>
+          <p data-i18n="skill_ill_desc">Digital illustration, from characters and scenes to concept art.</p>
         </div>
         <div class="skill-card glass-card">
           <span class="skill-icon">🖥️</span>
-          <h3>3D Artist</h3>
-          <p>Creating 3D character models, props for games, or 3D images for various uses.</p>
+          <h3 data-i18n="skill_3d_title">3D Artist</h3>
+          <p data-i18n="skill_3d_desc">Creating 3D character models, props for games, or 3D images for various uses.</p>
         </div>
         <div class="skill-card glass-card">
           <span class="skill-icon">🎭</span>
-          <h3>VFX Artist</h3>
-          <p>Specializing in Unity VFX Graph and Shaders to create effects for games and applications.</p>
+          <h3 data-i18n="skill_vfx_title">VFX Artist</h3>
+          <p data-i18n="skill_vfx_desc">Specializing in Unity VFX Graph and Shaders to create effects for games and applications.</p>
         </div>
       </div>
     </section>
@@ -106,8 +114,8 @@
     <!-- Contact Section -->
     <section class="contact-section reveal" id="contact">
       <div class="section-title">
-        <h2> Contact Me </h2>
-        <p>If you interested in my work </p>
+        <h2 data-i18n="section_contact"> Contact Me </h2>
+        <p data-i18n="contact_sub">If you interested in my work </p>
       </div>
 
       <div class="contact-links">
@@ -122,7 +130,7 @@
 
   <!-- Footer -->
   <footer class="footer">
-    <p>Made with 💜 by IframeXeno · © 2026</p>
+    <p data-i18n="footer_text">Made with 💜 by IframeXeno · © 2026</p>
   </footer>
 
   <!-- Toast Container -->

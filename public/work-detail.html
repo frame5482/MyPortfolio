@@ -10,6 +10,7 @@
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼</text></svg>">
   <link rel="stylesheet" href="/css/global.css">
   <link rel="stylesheet" href="/css/work-detail.css">
+  <script src="/js/i18n.js"></script>
 </head>
 
 <body>
@@ -31,33 +32,40 @@
     <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
       <span></span><span></span><span></span>
     </button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="/">✦ Home</a></li>
-      <li><a href="/works" class="active">🖼 Works</a></li>
-      <li><a href="/admin"> IframeXeno </a></li>
-    </ul>
+    <div style="display: flex; align-items: center;">
+      <div class="lang-switcher">
+        <button class="lang-btn" data-lang="th" onclick="setLanguage('th')">TH</button>
+        <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+        <button class="lang-btn" data-lang="jp" onclick="setLanguage('jp')">JP</button>
+      </div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/" data-i18n="nav_home">✦ Home</a></li>
+        <li><a href="/works" class="active" data-i18n="nav_works">🖼 Works</a></li>
+        <li><a href="/admin" data-i18n="nav_admin"> Admin </a></li>
+      </ul>
+    </div>
   </nav>
 
   <main class="page-content">
     <!-- Loading State -->
     <div class="detail-loading" id="detailLoading">
       <div class="spinner"></div>
-      <p>Loading work details...</p>
+      <p data-i18n="loading_detail">Loading work details...</p>
     </div>
 
     <!-- Error State -->
     <div class="detail-error" id="detailError" style="display:none;">
       <div class="emoji">😢</div>
-      <h2>Work Not Found</h2>
-      <p>The work you are looking for may have been deleted or the URL is incorrect.</p>
-      <a href="/works" class="btn btn-primary" style="margin-top:1rem;">🖼 Back to Works</a>
+      <h2 data-i18n="error_not_found">Work Not Found</h2>
+      <p data-i18n="error_sub">The work you are looking for may have been deleted or the URL is incorrect.</p>
+      <a href="/works" class="btn btn-primary" style="margin-top:1rem;" data-i18n="btn_back_works">🖼 Back to Works</a>
     </div>
 
     <!-- Detail Content -->
     <div class="detail-container" id="detailContainer" style="display:none;">
       <!-- Breadcrumb -->
       <div class="breadcrumb" id="breadcrumb">
-        <a href="/works">🖼 Works</a>
+        <a href="/works" data-i18n="breadcrumb_works">🖼 Works</a>
         <span class="breadcrumb-sep">›</span>
         <span class="breadcrumb-current" id="breadcrumbTitle">—</span>
       </div>
@@ -107,22 +115,22 @@
               <!-- Meta info table -->
               <div class="detail-meta">
                 <div class="meta-row">
-                  <span class="meta-label">📅 Published Date:</span>
+                  <span class="meta-label" data-i18n="meta_date">📅 Published Date:</span>
                   <span class="meta-value" id="detailDate">—</span>
                 </div>
                 <div class="meta-row" id="videoRow" style="display:none;">
-                  <span class="meta-label">🎬 Video:</span>
-                  <span class="meta-value"><a href="#" id="detailVideoLink" target="_blank">View on YouTube</a></span>
+                  <span class="meta-label" data-i18n="meta_video">🎬 Video:</span>
+                  <span class="meta-value"><a href="#" id="detailVideoLink" target="_blank" data-i18n="view_youtube">View on YouTube</a></span>
                 </div>
                 <div class="meta-row">
-                  <span class="meta-label">🖼️ Images count:</span>
+                  <span class="meta-label" data-i18n="meta_img_count">🖼️ Images count:</span>
                   <span class="meta-value" id="detailImgCount">—</span>
                 </div>
               </div>
 
               <!-- Tags -->
               <div class="detail-tags-section">
-                <div class="tags-label">Tags for this work:</div>
+                <div class="tags-label" data-i18n="label_tags">Tags for this work:</div>
                 <div class="detail-tags" id="detailTags"></div>
               </div>
             </div>
@@ -132,7 +140,7 @@
 
       <!-- Full Description Section (below) -->
       <div class="detail-full-desc glass-card" id="detailFullDesc" style="display:none;">
-        <h2>📝 More details</h2>
+        <h2 data-i18n="label_more_details">📝 More details</h2>
         <div class="full-desc-content" id="fullDescContent"></div>
       </div>
     </div>
@@ -150,7 +158,7 @@
   </div>
 
   <footer class="footer">
-    <p>Made with 💜 by IframeXeno · © 2026</p>
+    <p data-i18n="footer_text">Made with 💜 by IframeXeno · © 2026</p>
   </footer>
 
   <div class="toast-container" id="toastContainer"></div>

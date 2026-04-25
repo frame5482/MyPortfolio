@@ -10,6 +10,7 @@
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
   <link rel="stylesheet" href="/css/global.css">
   <link rel="stylesheet" href="/css/admin.css">
+  <script src="/js/i18n.js"></script>
 </head>
 
 <body>
@@ -31,72 +32,112 @@
     <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
       <span></span><span></span><span></span>
     </button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="/">✦ Home</a></li>
-      <li><a href="/works">🖼 Works</a></li>
-      <li><a href="/admin" class="active"> IframeXeno </a></li>
-    </ul>
+    <div style="display: flex; align-items: center;">
+      <div class="lang-switcher">
+        <button class="lang-btn" data-lang="th" onclick="setLanguage('th')">TH</button>
+        <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+        <button class="lang-btn" data-lang="jp" onclick="setLanguage('jp')">JP</button>
+      </div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/" data-i18n="nav_home">✦ Home</a></li>
+        <li><a href="/works" data-i18n="nav_works">🖼 Works</a></li>
+        <li><a href="/admin" class="active" data-i18n="nav_admin"> Admin </a></li>
+      </ul>
+    </div>
   </nav>
 
   <main class="page-content">
     <div class="admin-container">
 
       <div class="admin-header">
-        <h1>🔐 Admin Panel</h1>
-        <p>Manage your works</p>
+        <h1 data-i18n="admin_header">🔐 Admin Panel</h1>
+        <p data-i18n="admin_sub">Manage your works</p>
       </div>
 
       <!-- Logout topbar -->
       <div class="admin-topbar" id="adminTopbar">
-        <button class="btn btn-secondary btn-sm" id="logoutBtn">🚪 Logout</button>
+        <button class="btn btn-secondary btn-sm" id="logoutBtn" data-i18n="btn_logout">🚪 Logout</button>
       </div>
 
       <!-- Login Section -->
       <div class="login-section glass-card" id="loginSection">
         <span class="login-icon">🔑</span>
-        <h2>Login</h2>
-        <p>Enter password to manage works</p>
+        <h2 data-i18n="login_title">Login</h2>
+        <p data-i18n="login_sub">Enter password to manage works</p>
         <form class="login-form" id="loginForm">
-          <input type="password" id="passwordInput" placeholder="Password..." required autocomplete="current-password">
-          <button type="submit" class="btn btn-primary">🔓 Login</button>
+          <input type="password" id="passwordInput" placeholder="Password..." required autocomplete="current-password" data-i18n="placeholder_pass">
+          <button type="submit" class="btn btn-primary" data-i18n="btn_login">🔓 Login</button>
         </form>
       </div>
 
       <!-- Upload Section -->
       <div class="upload-section" id="uploadSection">
         <div class="upload-card glass-card">
-          <h2>📤 Upload New Work</h2>
+          <h2 data-i18n="upload_title">📤 Upload New Work</h2>
           <form id="uploadForm">
             <div class="form-group">
-              <label for="workTitle">Work Title</label>
+              <label for="workTitle" data-i18n="label_work_title">Work Title (Global/Reference)</label>
               <input type="text" id="workTitle" placeholder="e.g., Dreamy Forest" required>
             </div>
-            <div class="form-group">
-              <label for="workDesc">📝 Work Description (Detailed)</label>
-              <textarea id="workDesc" placeholder="Tell details about this work... &#10;e.g., inspiration, techniques, tools, time spent, etc." rows="8"></textarea>
-              <small style="color: var(--text-lighter); font-size: 0.8rem;">The description will be shown on the work detail page. You can be very detailed.</small>
+            <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 1.2rem;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="workTitleTh" data-i18n="label_title_th">🇹🇭 Title (Thai)</label>
+                <input type="text" id="workTitleTh" placeholder="ชื่อผลงานภาษาไทย">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="workTitleEn" data-i18n="label_title_en">🇺🇸 Title (English)</label>
+                <input type="text" id="workTitleEn" placeholder="English Title">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="workTitleJp" data-i18n="label_title_jp">🇯🇵 Title (Japanese)</label>
+                <input type="text" id="workTitleJp" placeholder="日本語のタイトル">
+              </div>
             </div>
             <div class="form-group">
-              <label for="workTags">Tags (comma separated)</label>
+              <label data-i18n="label_desc_multi">📝 Work Description (Multi-language)</label>
+              <div class="tab-container" style="margin-bottom: 0.5rem;">
+                <div class="tab-headers" style="display: flex; gap: 10px; border-bottom: 1px solid var(--border); margin-bottom: 10px;">
+                  <button type="button" class="tab-btn active" onclick="switchDescTab('th')" id="tabBtnTh">🇹🇭 Thai</button>
+                  <button type="button" class="tab-btn" onclick="switchDescTab('en')" id="tabBtnEn">🇺🇸 English</button>
+                  <button type="button" class="tab-btn" onclick="switchDescTab('jp')" id="tabBtnJp">🇯🇵 Japanese</button>
+                </div>
+                <div class="tab-content">
+                  <div class="desc-tab" id="descTabTh">
+                    <textarea id="workDescTh" placeholder="เล่ารายละเอียดเกี่ยวกับผลงานนี้ (ภาษาไทย)..." rows="6" data-i18n="placeholder_desc_th"></textarea>
+                  </div>
+                  <div class="desc-tab" id="descTabEn" style="display:none;">
+                    <textarea id="workDescEn" placeholder="Tell details about this work (English)..." rows="6" data-i18n="placeholder_desc_en"></textarea>
+                  </div>
+                  <div class="desc-tab" id="descTabJp" style="display:none;">
+                    <textarea id="workDescJp" placeholder="この作品についての詳細 (日本語)..." rows="6" data-i18n="placeholder_desc_jp"></textarea>
+                  </div>
+                </div>
+              </div>
+              <!-- Legacy field for backward compatibility -->
+              <input type="hidden" id="workDesc"> 
+              <small style="color: var(--text-lighter); font-size: 0.8rem;">The description will be shown on the work detail page in the selected language.</small>
+            </div>
+            <div class="form-group">
+              <label for="workTags" data-i18n="label_tags_input">Tags (comma separated)</label>
               <input type="text" id="workTags" placeholder="e.g., illustration, character, fantasy" required>
             </div>
             <div class="form-group">
-              <label>🎬 YouTube URL (Multiple allowed)</label>
-              <small style="color: var(--text-lighter); font-size: 0.8rem; display: block; margin-bottom: 0.6rem;">Insert YouTube links to auto-play videos on the detail page.</small>
+              <label data-i18n="label_yt_url">🎬 YouTube URL (Multiple allowed)</label>
+              <small style="color: var(--text-lighter); font-size: 0.8rem; display: block; margin-bottom: 0.6rem;" data-i18n="yt_sub">Insert YouTube links to auto-play videos on the detail page.</small>
               <div id="videoInputsContainer">
                 <div class="dynamic-input-row" style="display:flex; gap:10px; margin-bottom:0.5rem;">
                   <input type="url" name="videos" class="work-video-input" placeholder="e.g., https://www.youtube.com/watch?v=xxxxx" style="flex:1;">
                   <button type="button" class="btn btn-secondary btn-sm remove-input-btn" style="padding:0 0.8rem; font-size:1.2rem; display:none;">✕</button>
                 </div>
               </div>
-              <button type="button" class="btn btn-secondary btn-sm" id="addVideoBtn" style="margin-top:0.3rem; background:var(--bg-alt);">+ Add YouTube Video</button>
+              <button type="button" class="btn btn-secondary btn-sm" id="addVideoBtn" style="margin-top:0.3rem; background:var(--bg-alt);" data-i18n="btn_add_yt">+ Add YouTube Video</button>
             </div>
             <div class="form-group">
-              <label>Main Image (Upload file or insert image link)</label>
-              <input type="url" id="workImageUrl" placeholder="Insert image link (e.g., https://...)" style="margin-bottom: 0.8rem;">
+              <label data-i18n="label_main_img">Main Image (Upload file or insert image link)</label>
+              <input type="url" id="workImageUrl" placeholder="Insert image link (e.g., https://...)" style="margin-bottom: 0.8rem;" data-i18n="placeholder_img_url">
               <div class="file-upload-area" id="fileUploadArea">
                 <div class="upload-icon">📁</div>
-                <p>Drag and drop files here or click to select</p>
+                <p data-i18n="drag_drop_main">Drag and drop files here or click to select</p>
                 <input type="file" id="workImage" accept="image/*">
               </div>
               <div class="image-preview" id="imagePreview" style="position: relative;">
@@ -110,8 +151,8 @@
 
             <!-- Multi-image upload for gallery -->
             <div class="form-group">
-              <label>🖼 Additional Images (Upload files / Multiple links)</label>
-              <small style="color: var(--text-lighter); font-size: 0.8rem; display: block; margin-bottom: 0.6rem;">
+              <label data-i18n="label_extra_img">🖼 Additional Images (Upload files / Multiple links)</label>
+              <small style="color: var(--text-lighter); font-size: 0.8rem; display: block; margin-bottom: 0.6rem;" data-i18n="extra_img_sub">
                 These images will be displayed as a gallery on the work detail page.
               </small>
               
@@ -122,19 +163,19 @@
                   <button type="button" class="btn btn-secondary btn-sm remove-input-btn" style="padding:0 0.8rem; font-size:1.2rem; display:none;">✕</button>
                 </div>
               </div>
-              <button type="button" class="btn btn-secondary btn-sm" id="addExternalImageBtn" style="margin-bottom:1rem; background:var(--bg-alt);">+ Add Image Link</button>
+              <button type="button" class="btn btn-secondary btn-sm" id="addExternalImageBtn" style="margin-bottom:1rem; background:var(--bg-alt);" data-i18n="btn_add_img_link">+ Add Image Link</button>
 
               <div class="file-upload-area" id="multiFileUploadArea">
                 <div class="upload-icon">🖼</div>
-                <p>Drag and drop files or click to select multiple images</p>
+                <p data-i18n="drag_drop_multi">Drag and drop files or click to select multiple images</p>
                 <input type="file" id="workImages" accept="image/*" multiple>
               </div>
               <div class="multi-image-previews" id="multiImagePreviews"></div>
             </div>
             <div style="display: flex; gap: 10px;">
-              <button type="submit" id="submitBtn" class="btn btn-primary" style="flex: 1;">✨ Upload</button>
+              <button type="submit" id="submitBtn" class="btn btn-primary" style="flex: 1;" data-i18n="btn_upload">✨ Upload</button>
               <button type="button" id="cancelEditBtn" class="btn"
-                style="display: none; background: #ddd; color: #333;">❌ Cancel</button>
+                style="display: none; background: #ddd; color: #333;" data-i18n="btn_cancel">❌ Cancel</button>
             </div>
           </form>
         </div>
@@ -142,7 +183,7 @@
 
       <!-- Existing Works -->
       <div class="works-list-section" id="worksListSection">
-        <h2>📋 All Works</h2>
+        <h2 data-i18n="all_works_title">📋 All Works</h2>
         <div id="worksList"></div>
       </div>
 
@@ -150,10 +191,19 @@
   </main>
 
   <footer class="footer">
-    <p>Made with 💜 by IframeXeno · © 2026</p>
+    <p data-i18n="footer_text">Made with 💜 by IframeXeno · © 2026</p>
   </footer>
 
   <div class="toast-container" id="toastContainer"></div>
+  <script>
+    function switchDescTab(lang) {
+      document.querySelectorAll('.desc-tab').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.tab-headers .tab-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById('descTab' + lang.charAt(0).toUpperCase() + lang.slice(1)).style.display = 'block';
+      document.getElementById('tabBtn' + lang.charAt(0).toUpperCase() + lang.slice(1)).classList.add('active');
+    }
+  </script>
   <script src="/js/admin.js"></script>
 </body>
 

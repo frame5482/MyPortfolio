@@ -7,8 +7,15 @@ mongoose.connect(MONGODB_URI)
   .catch(err => console.error('❌ Failed to connect to MongoDB', err));
 
 const workSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: { type: String, default: '' },
+  title_th: { type: String, default: '' },
+  title_en: { type: String, default: '' },
+  title_jp: { type: String, default: '' },
+  // Keeping original title for compatibility if needed, but will prioritize the others
+  title: { type: String, required: true }, 
+  description_th: { type: String, default: '' },
+  description_en: { type: String, default: '' },
+  description_jp: { type: String, default: '' },
+  description: { type: String, default: '' }, // Legacy
   image_url: { type: String, default: '' },
   images: { type: [String], default: [] },
   video_url: { type: String, default: null },

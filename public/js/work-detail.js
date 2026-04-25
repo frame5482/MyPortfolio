@@ -15,6 +15,10 @@ let allMedia = [];   // Array of { type: 'image'|'video', src: string, thumb: st
 let currentMediaIndex = 0;
 let fullscreenIndex = 0;
 
+window.addEventListener('languageChanged', () => {
+  renderDetail();
+});
+
 // --- Navigation ---
 function initNav() {
   const toggle = document.getElementById('navToggle');
@@ -85,11 +89,15 @@ function renderDetail() {
   const work = currentWork;
   if (!work) return;
 
+  const lang = getCurrentLang();
+  const title = work[`title_${lang}`] || work.title;
+  const description = work[`description_${lang}`] || work.description;
+
   // Update page title
-  document.title = `${work.title} — IframeXeno ✨`;
+  document.title = `${title} — IframeXeno ✨`;
 
   // Breadcrumb
-  document.getElementById('breadcrumbTitle').textContent = work.title;
+  document.getElementById('breadcrumbTitle').textContent = title;
 
   // Build media array
   allMedia = [];
@@ -139,15 +147,14 @@ function renderDetail() {
   // Info panel — cover
   const infoCoverImg = document.getElementById('infoCoverImg');
   infoCoverImg.src = work.image_url || getYouTubeThumbnail(work.video_url) || '';
-  infoCoverImg.alt = work.title;
+  infoCoverImg.alt = title;
 
   // Title
-  document.getElementById('detailTitle').textContent = work.title;
+  document.getElementById('detailTitle').textContent = title;
 
   // Short description in info panel
   const descEl = document.getElementById('detailDesc');
-  const shortDesc = work.description || '';
-  descEl.textContent = shortDesc;
+  descEl.textContent = description || '';
 
   // Date
   const date = new Date(work.created_at);
@@ -180,9 +187,11 @@ function renderDetail() {
   ).join('');
 
   // Full description below
-  if (shortDesc && shortDesc.length > 100) {
+  if (description && description.length > 100) {
     document.getElementById('detailFullDesc').style.display = '';
-    document.getElementById('fullDescContent').textContent = shortDesc;
+    document.getElementById('fullDescContent').textContent = description;
+  } else {
+    document.getElementById('detailFullDesc').style.display = 'none';
   }
 }
 
