@@ -1,7 +1,7 @@
 const translations = {
   th: {
     nav_home: "✦ หน้าหลัก",
-    nav_works: "🖼 ผลงาน",
+    nav_works: " ผลงาน ",
     nav_admin: "IframeXeno",
     hero_title: "GameDev · Illustration · 3D Artist · VFX Artist ✨",
     hero_bio: "สวัสดี! ยินดีต้อนรับสู่ portfolio ถ้าหา 3D Artist หรือ VFX Artist ติดต่อมาได้เลย",
@@ -19,7 +19,7 @@ const translations = {
     footer_text: "สร้างด้วย 💜 โดย IframeXeno · © 2026",
 
     // Works page
-    works_header: "🖼 ผลงานของฉัน",
+    works_header: " ผลงานของฉัน ",
     works_sub: "รวมผลงานศิลปะ ภาพประกอบ และงานออกแบบ",
     tag_all: "✦ ทั้งหมด",
     empty_works: "ยังไม่มีผลงาน... กลับมาดูใหม่เร็วๆ นี้นะ!",
@@ -62,7 +62,7 @@ const translations = {
     label_main_img: "รูปภาพหลัก (เลือกอัปโหลดไฟล์ หรือใส่ลิงก์รูปภาพก็ได้)",
     placeholder_img_url: "ใส่ลิงก์รูปภาพ (เช่น https://...)",
     drag_drop_main: "ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือก",
-    label_extra_img: "🖼 รูปภาพเพิ่มเติม (อัปโหลดไฟล์ / ใส่ลิงก์หลายรูป)",
+    label_extra_img: " รูปภาพเพิ่มเติม (อัปโหลดไฟล์ / ใส่ลิงก์หลายรูป)",
     extra_img_sub: "รูปเหล่านี้จะแสดงเป็นแกลเลอรี่ในหน้ารายละเอียดผลงาน",
     btn_add_img_link: "+ เพิ่มลิงก์รูปภาพ",
     drag_drop_multi: "ลากไฟล์มาวาง หรือคลิกเพื่อเลือกหลายรูป",
@@ -74,7 +74,7 @@ const translations = {
   },
   en: {
     nav_home: "✦ Home",
-    nav_works: "🖼 Works",
+    nav_works: " Works ",
     nav_admin: "IframeXeno",
     hero_title: "GameDev · Illustration · 3D Artist · VFX Artist ✨",
     hero_bio: "Hello! Welcome to my portfolio. If you're looking for a 3D Artist or VFX Artist, feel free to contact me.",
@@ -92,7 +92,7 @@ const translations = {
     footer_text: "Made with 💜 by IframeXeno · © 2026",
 
     // Works page
-    works_header: "🖼 My Works",
+    works_header: " My Works ",
     works_sub: "A collection of my artworks, illustrations, and designs.",
     tag_all: "✦ All",
     empty_works: "No works found... check back soon!",
@@ -135,7 +135,7 @@ const translations = {
     label_main_img: "Main Image (Upload file or link)",
     placeholder_img_url: "Insert image link (e.g., https://...)",
     drag_drop_main: "Drag and drop files here or click to select",
-    label_extra_img: "🖼 Additional Images (Upload / Links)",
+    label_extra_img: " Additional Images (Upload / Links)",
     extra_img_sub: "These images will be displayed as a gallery on the work detail page.",
     btn_add_img_link: "+ Add Image Link",
     drag_drop_multi: "Drag and drop files or click to select multiple",
@@ -147,7 +147,7 @@ const translations = {
   },
   jp: {
     nav_home: "✦ ホーム",
-    nav_works: "🖼 作品",
+    nav_works: " 作品 ",
     nav_admin: "IframeXeno",
     hero_title: "ゲーム開発 · イラスト · 3Dアーティスト · VFXアーティスト ✨",
     hero_bio: "こんにちは！ポートフォリオへようこそ。3DアーティストまたはVFXアーティストをお探しの場合は、お気軽にお問い合わせください。",
@@ -165,7 +165,7 @@ const translations = {
     footer_text: "IframeXenoによって💜を込めて作られました · © 2026",
 
     // Works page
-    works_header: "🖼 私の作品",
+    works_header: "私の作品",
     works_sub: "アート、イラスト、デザインのコレクション。",
     tag_all: "✦ すべて",
     empty_works: "作品が見つかりません... またすぐにチェックしてください！",
@@ -208,7 +208,7 @@ const translations = {
     label_main_img: "メイン画像 (アップロードまたはリンク)",
     placeholder_img_url: "画像リンクを入力 (例: https://...)",
     drag_drop_main: "ファイルをドラッグ＆ドロップ、またはクリックして選択",
-    label_extra_img: "🖼 追加画像 (アップロード / リンク)",
+    label_extra_img: " 追加画像 (アップロード / リンク)",
     extra_img_sub: "これらの画像は詳細ページのギャラリーに表示されます。",
     btn_add_img_link: "+ 画像リンクを追加",
     drag_drop_multi: "ファイルをドラッグ＆ドロップ、またはクリックして複数選択",
