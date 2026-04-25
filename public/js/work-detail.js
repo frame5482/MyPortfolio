@@ -151,7 +151,7 @@ function renderDetail() {
 
   // Date
   const date = new Date(work.created_at);
-  const dateStr = date.toLocaleDateString('th-TH', {
+  const dateStr = date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -168,8 +168,8 @@ function renderDetail() {
   // Image count
   const imgCount = allMedia.filter(m => m.type === 'image').length;
   const vidCount = allMedia.filter(m => m.type === 'video').length;
-  let countText = `${imgCount} รูป`;
-  if (vidCount > 0) countText += ` + ${vidCount} วิดีโอ`;
+  let countText = `${imgCount} images`;
+  if (vidCount > 0) countText += ` + ${vidCount} videos`;
   document.getElementById('detailImgCount').textContent = countText;
 
   // Tags

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
@@ -42,22 +42,22 @@
     <!-- Loading State -->
     <div class="detail-loading" id="detailLoading">
       <div class="spinner"></div>
-      <p>กำลังโหลดข้อมูลผลงาน...</p>
+      <p>Loading work details...</p>
     </div>
 
     <!-- Error State -->
     <div class="detail-error" id="detailError" style="display:none;">
       <div class="emoji">😢</div>
-      <h2>ไม่พบผลงาน</h2>
-      <p>ผลงานที่คุณกำลังหาอาจถูกลบ หรือ URL ไม่ถูกต้อง</p>
-      <a href="/works" class="btn btn-primary" style="margin-top:1rem;">🖼 กลับไปหน้าผลงาน</a>
+      <h2>Work Not Found</h2>
+      <p>The work you are looking for may have been deleted or the URL is incorrect.</p>
+      <a href="/works" class="btn btn-primary" style="margin-top:1rem;">🖼 Back to Works</a>
     </div>
 
     <!-- Detail Content -->
     <div class="detail-container" id="detailContainer" style="display:none;">
       <!-- Breadcrumb -->
       <div class="breadcrumb" id="breadcrumb">
-        <a href="/works">🖼 ผลงาน</a>
+        <a href="/works">🖼 Works</a>
         <span class="breadcrumb-sep">›</span>
         <span class="breadcrumb-current" id="breadcrumbTitle">—</span>
       </div>
@@ -74,7 +74,7 @@
               frameborder="0" allowfullscreen
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
             </iframe>
-            <button class="gallery-fullscreen-btn" id="fullscreenBtn" title="ดูเต็มจอ">
+            <button class="gallery-fullscreen-btn" id="fullscreenBtn" title="View Fullscreen">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
               </svg>
@@ -107,22 +107,22 @@
               <!-- Meta info table -->
               <div class="detail-meta">
                 <div class="meta-row">
-                  <span class="meta-label">📅 วันที่เผยแพร่:</span>
+                  <span class="meta-label">📅 Published Date:</span>
                   <span class="meta-value" id="detailDate">—</span>
                 </div>
                 <div class="meta-row" id="videoRow" style="display:none;">
-                  <span class="meta-label">🎬 วิดีโอ:</span>
-                  <span class="meta-value"><a href="#" id="detailVideoLink" target="_blank">ดูบน YouTube</a></span>
+                  <span class="meta-label">🎬 Video:</span>
+                  <span class="meta-value"><a href="#" id="detailVideoLink" target="_blank">View on YouTube</a></span>
                 </div>
                 <div class="meta-row">
-                  <span class="meta-label">🖼️ จำนวนรูป:</span>
+                  <span class="meta-label">🖼️ Images count:</span>
                   <span class="meta-value" id="detailImgCount">—</span>
                 </div>
               </div>
 
               <!-- Tags -->
               <div class="detail-tags-section">
-                <div class="tags-label">แท็กสำหรับผลงานนี้:</div>
+                <div class="tags-label">Tags for this work:</div>
                 <div class="detail-tags" id="detailTags"></div>
               </div>
             </div>
@@ -132,7 +132,7 @@
 
       <!-- Full Description Section (below) -->
       <div class="detail-full-desc glass-card" id="detailFullDesc" style="display:none;">
-        <h2>📝 รายละเอียดเพิ่มเติม</h2>
+        <h2>📝 More details</h2>
         <div class="full-desc-content" id="fullDescContent"></div>
       </div>
     </div>

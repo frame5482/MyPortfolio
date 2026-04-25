@@ -149,9 +149,9 @@ function renderWorks() {
       : '';
       
     // Star badge
-    const starBadge = work.is_starred ? `<div class="star-badge" title="ผลงานแนะนำ">⭐</div>` : '';
+    const starBadge = work.is_starred ? `<div class="star-badge" title="Featured Work">⭐</div>` : '';
 
-    const recBadge = work.is_starred ? '<span class="recommended-badge">⭐ แนะนำ</span>' : '';
+    const recBadge = work.is_starred ? '<span class="recommended-badge">⭐ Featured</span>' : '';
 
     card.innerHTML = `
       <div class="card-media">

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
@@ -43,60 +43,60 @@
 
       <div class="admin-header">
         <h1>🔐 Admin Panel</h1>
-        <p>จัดการผลงานของคุณ</p>
+        <p>Manage your works</p>
       </div>
 
       <!-- Logout topbar -->
       <div class="admin-topbar" id="adminTopbar">
-        <button class="btn btn-secondary btn-sm" id="logoutBtn">🚪 ออกจากระบบ</button>
+        <button class="btn btn-secondary btn-sm" id="logoutBtn">🚪 Logout</button>
       </div>
 
       <!-- Login Section -->
       <div class="login-section glass-card" id="loginSection">
         <span class="login-icon">🔑</span>
-        <h2>เข้าสู่ระบบ</h2>
-        <p>กรอกรหัสผ่านเพื่อจัดการผลงาน</p>
+        <h2>Login</h2>
+        <p>Enter password to manage works</p>
         <form class="login-form" id="loginForm">
-          <input type="password" id="passwordInput" placeholder="รหัสผ่าน..." required autocomplete="current-password">
-          <button type="submit" class="btn btn-primary">🔓 เข้าสู่ระบบ</button>
+          <input type="password" id="passwordInput" placeholder="Password..." required autocomplete="current-password">
+          <button type="submit" class="btn btn-primary">🔓 Login</button>
         </form>
       </div>
 
       <!-- Upload Section -->
       <div class="upload-section" id="uploadSection">
         <div class="upload-card glass-card">
-          <h2>📤 อัปโหลดผลงานใหม่</h2>
+          <h2>📤 Upload New Work</h2>
           <form id="uploadForm">
             <div class="form-group">
-              <label for="workTitle">ชื่อผลงาน</label>
-              <input type="text" id="workTitle" placeholder="เช่น Dreamy Forest" required>
+              <label for="workTitle">Work Title</label>
+              <input type="text" id="workTitle" placeholder="e.g., Dreamy Forest" required>
             </div>
             <div class="form-group">
-              <label for="workDesc">📝 คำอธิบายผลงาน (ใส่ได้ละเอียด)</label>
-              <textarea id="workDesc" placeholder="เล่ารายละเอียดเกี่ยวกับผลงานนี้... &#10;เช่น แรงบันดาลใจ, เทคนิคที่ใช้, เครื่องมือ, เวลาที่ใช้ทำ ฯลฯ" rows="8"></textarea>
-              <small style="color: var(--text-lighter); font-size: 0.8rem;">คำอธิบายจะแสดงในหน้ารายละเอียดผลงาน สามารถใส่ได้ยาวๆ ละเอียดๆ</small>
+              <label for="workDesc">📝 Work Description (Detailed)</label>
+              <textarea id="workDesc" placeholder="Tell details about this work... &#10;e.g., inspiration, techniques, tools, time spent, etc." rows="8"></textarea>
+              <small style="color: var(--text-lighter); font-size: 0.8rem;">The description will be shown on the work detail page. You can be very detailed.</small>
             </div>
             <div class="form-group">
-              <label for="workTags">แท็ก (คั่นด้วยคอมมา)</label>
-              <input type="text" id="workTags" placeholder="เช่น illustration, character, fantasy" required>
+              <label for="workTags">Tags (comma separated)</label>
+              <input type="text" id="workTags" placeholder="e.g., illustration, character, fantasy" required>
             </div>
             <div class="form-group">
-              <label>🎬 YouTube URL (ใส่ได้หลายคลิป)</label>
-              <small style="color: var(--text-lighter); font-size: 0.8rem; display: block; margin-bottom: 0.6rem;">ใส่ลิงก์ YouTube จะเล่นวิดีโออัตโนมัติเมื่อเปิดดู</small>
+              <label>🎬 YouTube URL (Multiple allowed)</label>
+              <small style="color: var(--text-lighter); font-size: 0.8rem; display: block; margin-bottom: 0.6rem;">Insert YouTube links to auto-play videos on the detail page.</small>
               <div id="videoInputsContainer">
                 <div class="dynamic-input-row" style="display:flex; gap:10px; margin-bottom:0.5rem;">
-                  <input type="url" name="videos" class="work-video-input" placeholder="เช่น https://www.youtube.com/watch?v=xxxxx" style="flex:1;">
+                  <input type="url" name="videos" class="work-video-input" placeholder="e.g., https://www.youtube.com/watch?v=xxxxx" style="flex:1;">
                   <button type="button" class="btn btn-secondary btn-sm remove-input-btn" style="padding:0 0.8rem; font-size:1.2rem; display:none;">✕</button>
                 </div>
               </div>
-              <button type="button" class="btn btn-secondary btn-sm" id="addVideoBtn" style="margin-top:0.3rem; background:var(--bg-alt);">+ เพิ่มวิดีโอ YouTube</button>
+              <button type="button" class="btn btn-secondary btn-sm" id="addVideoBtn" style="margin-top:0.3rem; background:var(--bg-alt);">+ Add YouTube Video</button>
             </div>
             <div class="form-group">
-              <label>รูปภาพหลัก (เลือกอัปโหลดไฟล์ หรือใส่ลิงก์รูปภาพก็ได้)</label>
-              <input type="url" id="workImageUrl" placeholder="ใส่ลิงก์รูปภาพ (เช่น https://...)" style="margin-bottom: 0.8rem;">
+              <label>Main Image (Upload file or insert image link)</label>
+              <input type="url" id="workImageUrl" placeholder="Insert image link (e.g., https://...)" style="margin-bottom: 0.8rem;">
               <div class="file-upload-area" id="fileUploadArea">
                 <div class="upload-icon">📁</div>
-                <p>ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือก</p>
+                <p>Drag and drop files here or click to select</p>
                 <input type="file" id="workImage" accept="image/*">
               </div>
               <div class="image-preview" id="imagePreview" style="position: relative;">
@@ -110,31 +110,31 @@
 
             <!-- Multi-image upload for gallery -->
             <div class="form-group">
-              <label>🖼 รูปภาพเพิ่มเติม (อัปโหลดไฟล์ / ใส่ลิงก์หลายรูป)</label>
+              <label>🖼 Additional Images (Upload files / Multiple links)</label>
               <small style="color: var(--text-lighter); font-size: 0.8rem; display: block; margin-bottom: 0.6rem;">
-                รูปเหล่านี้จะแสดงเป็นแกลเลอรี่ในหน้ารายละเอียดผลงาน
+                These images will be displayed as a gallery on the work detail page.
               </small>
               
               <!-- Multiple External Links -->
               <div id="externalImageInputsContainer" style="margin-bottom: 1rem;">
                 <div class="dynamic-input-row" style="display:flex; gap:10px; margin-bottom:0.5rem;">
-                  <input type="url" name="external_images" class="work-ext-image-input" placeholder="ใส่ลิงก์รูปภาพเพิ่มเติม (เช่น https://...)" style="flex:1;">
+                  <input type="url" name="external_images" class="work-ext-image-input" placeholder="Insert additional image link (e.g., https://...)" style="flex:1;">
                   <button type="button" class="btn btn-secondary btn-sm remove-input-btn" style="padding:0 0.8rem; font-size:1.2rem; display:none;">✕</button>
                 </div>
               </div>
-              <button type="button" class="btn btn-secondary btn-sm" id="addExternalImageBtn" style="margin-bottom:1rem; background:var(--bg-alt);">+ เพิ่มลิงก์รูปภาพ</button>
+              <button type="button" class="btn btn-secondary btn-sm" id="addExternalImageBtn" style="margin-bottom:1rem; background:var(--bg-alt);">+ Add Image Link</button>
 
               <div class="file-upload-area" id="multiFileUploadArea">
                 <div class="upload-icon">🖼</div>
-                <p>ลากไฟล์มาวาง หรือคลิกเพื่อเลือกหลายรูป</p>
+                <p>Drag and drop files or click to select multiple images</p>
                 <input type="file" id="workImages" accept="image/*" multiple>
               </div>
               <div class="multi-image-previews" id="multiImagePreviews"></div>
             </div>
             <div style="display: flex; gap: 10px;">
-              <button type="submit" id="submitBtn" class="btn btn-primary" style="flex: 1;">✨ อัปโหลด</button>
+              <button type="submit" id="submitBtn" class="btn btn-primary" style="flex: 1;">✨ Upload</button>
               <button type="button" id="cancelEditBtn" class="btn"
-                style="display: none; background: #ddd; color: #333;">❌ ยกเลิก</button>
+                style="display: none; background: #ddd; color: #333;">❌ Cancel</button>
             </div>
           </form>
         </div>
@@ -142,7 +142,7 @@
 
       <!-- Existing Works -->
       <div class="works-list-section" id="worksListSection">
-        <h2>📋 ผลงานทั้งหมด</h2>
+        <h2>📋 All Works</h2>
         <div id="worksList"></div>
       </div>
 

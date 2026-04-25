@@ -87,16 +87,16 @@ function initLogin() {
       });
       const data = await res.json();
       if (!res.ok) {
-        showToast(data.error || 'รหัสผ่านไม่ถูกต้อง', 'error');
+        showToast(data.error || 'Incorrect password', 'error');
         return;
       }
       authToken = data.token;
       localStorage.setItem('artfolio_token', authToken);
-      showToast('เข้าสู่ระบบสำเร็จ! ✨');
+      showToast('Login successful! ✨');
       showAdminPanel();
       loadAdminWorks();
     } catch (err) {
-      showToast('เกิดข้อผิดพลาด', 'error');
+      showToast('An error occurred', 'error');
     }
   });
 }
@@ -108,7 +108,7 @@ function initLogout() {
     localStorage.removeItem('artfolio_token');
     hideAdminPanel();
     document.getElementById('passwordInput').value = '';
-    showToast('ออกจากระบบแล้ว');
+    showToast('Logged out');
   });
 }
 
@@ -226,7 +226,7 @@ function createPreviewItem(src, type, index, name) {
   wrapper.className = 'multi-preview-item';
   wrapper.innerHTML = `
     <img src="${src}" alt="Preview ${index + 1}">
-    <button type="button" class="multi-preview-remove" title="ลบรูปนี้">✖</button>
+    <button type="button" class="multi-preview-remove" title="Remove this image">✖</button>
     <span class="multi-preview-label">${type === 'existing' ? '📌' : '✨'} ${name || (index + 1)}</span>
   `;
 
@@ -245,11 +245,11 @@ function createPreviewItem(src, type, index, name) {
 // --- Dynamic Inputs (Videos & External Images) ---
 function initDynamicInputs() {
   document.getElementById('addVideoBtn').addEventListener('click', () => {
-    addDynamicInput('videoInputsContainer', 'videos', 'work-video-input', 'เช่น https://www.youtube.com/watch?v=xxxxx');
+    addDynamicInput('videoInputsContainer', 'videos', 'work-video-input', 'e.g., https://www.youtube.com/watch?v=xxxxx');
   });
 
   document.getElementById('addExternalImageBtn').addEventListener('click', () => {
-    addDynamicInput('externalImageInputsContainer', 'external_images', 'work-ext-image-input', 'ใส่ลิงก์รูปภาพเพิ่มเติม (เช่น https://...)');
+    addDynamicInput('externalImageInputsContainer', 'external_images', 'work-ext-image-input', 'Insert additional image link (e.g., https://...)');
   });
 
   // Event delegation for remove buttons
@@ -296,7 +296,7 @@ function initUpload() {
     const externalImageUrl = document.getElementById('workImageUrl').value.trim();
 
     if (!imageFile && !videoUrl && !externalImageUrl) {
-      showToast('กรุณาใส่รูปภาพ หรือ YouTube URL', 'error');
+      showToast('Please insert an image or YouTube URL', 'error');
       return;
     }
 
@@ -327,7 +327,7 @@ function initUpload() {
 
     const submitBtn = document.getElementById('submitBtn');
     const originalBtnText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '⏳ กำลังอัปโหลด...';
+    submitBtn.innerHTML = '⏳ Uploading...';
     submitBtn.disabled = true;
 
     try {
@@ -340,7 +340,7 @@ function initUpload() {
           if (e.lengthComputable) {
             const loadedMB = (e.loaded / 1024 / 1024).toFixed(1);
             const totalMB = (e.total / 1024 / 1024).toFixed(1);
-            submitBtn.innerHTML = `⏳ กำลังอัปโหลด... ${loadedMB}/${totalMB}MB`;
+            submitBtn.innerHTML = `⏳ Uploading... ${loadedMB}/${totalMB}MB`;
           }
         };
 
@@ -354,17 +354,17 @@ function initUpload() {
                 authToken = null;
                 localStorage.removeItem('artfolio_token');
                 hideAdminPanel();
-                reject({ error: 'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่' });
+                reject({ error: 'Session expired, please login again' });
               } else {
                 reject(data);
               }
             }
           } catch(err) {
-            reject({ error: 'เกิดข้อผิดพลาดในการอ่านข้อมูล' });
+            reject({ error: 'Error reading data' });
           }
         };
 
-        xhr.onerror = () => reject({ error: 'Network error เกิดข้อผิดพลาดในการเชื่อมต่อ' });
+        xhr.onerror = () => reject({ error: 'Network error: failed to connect' });
         xhr.send(formData);
       });
 
@@ -382,12 +382,12 @@ function initUpload() {
         await new Promise(r => setTimeout(r, 1000)); // wait 1 sec to let user see ticks
       }
 
-      showToast(editingId ? 'อัปเดตผลงานสำเร็จ! ✨' : 'อัปโหลดสำเร็จ! ✨');
+      showToast(editingId ? 'Update successful! ✨' : 'Upload successful! ✨');
       cancelEdit();
       loadAdminWorks();
     } catch (err) {
       console.error('Upload error:', err);
-      showToast(err.error || 'เกิดข้อผิดพลาดในการอัปโหลด', 'error');
+      showToast(err.error || 'Error uploading', 'error');
     } finally {
       submitBtn.innerHTML = originalBtnText;
       submitBtn.disabled = false;
@@ -409,20 +409,20 @@ function cancelEdit() {
   // Reset dynamic inputs
   clearDynamicInputs('videoInputsContainer', `
     <div class="dynamic-input-row" style="display:flex; gap:10px; margin-bottom:0.5rem;">
-      <input type="url" name="videos" class="work-video-input" placeholder="เช่น https://www.youtube.com/watch?v=xxxxx" style="flex:1;">
+      <input type="url" name="videos" class="work-video-input" placeholder="e.g., https://www.youtube.com/watch?v=xxxxx" style="flex:1;">
       <button type="button" class="btn btn-secondary btn-sm remove-input-btn" style="padding:0 0.8rem; font-size:1.2rem; display:none;">✕</button>
     </div>
   `);
   clearDynamicInputs('externalImageInputsContainer', `
     <div class="dynamic-input-row" style="display:flex; gap:10px; margin-bottom:0.5rem;">
-      <input type="url" name="external_images" class="work-ext-image-input" placeholder="ใส่ลิงก์รูปภาพเพิ่มเติม (เช่น https://...)" style="flex:1;">
+      <input type="url" name="external_images" class="work-ext-image-input" placeholder="Insert additional image link (e.g., https://...)" style="flex:1;">
       <button type="button" class="btn btn-secondary btn-sm remove-input-btn" style="padding:0 0.8rem; font-size:1.2rem; display:none;">✕</button>
     </div>
   `);
 
-  document.getElementById('submitBtn').innerHTML = '✨ อัปโหลด';
+  document.getElementById('submitBtn').innerHTML = '✨ Upload';
   document.getElementById('cancelEditBtn').style.display = 'none';
-  document.querySelector('.upload-card h2').textContent = '📤 อัปโหลดผลงานใหม่';
+  document.querySelector('.upload-card h2').textContent = '📤 Upload New Work';
 }
 
 // --- Load Admin Works List ---
@@ -435,7 +435,7 @@ async function loadAdminWorks() {
     window.adminWorks = works; // Store globally for editing
 
     if (!Array.isArray(works) || works.length === 0) {
-      container.innerHTML = '<div class="empty-state"><div class="emoji">📭</div><p>ยังไม่มีผลงาน (หรือเชื่อมต่อฐานข้อมูลไม่ได้)</p></div>';
+      container.innerHTML = '<div class="empty-state"><div class="emoji">📭</div><p>No works yet (or database connection failed)</p></div>';
       return;
     }
 
@@ -443,7 +443,7 @@ async function loadAdminWorks() {
       const thumbSrc = work.image_url || getYouTubeThumbnail(work.video_url);
       const videoBadge = work.video_url ? '<span style="color:var(--peach-dark);font-size:0.75rem;">🎬 YouTube</span>' : '';
       const imgCount = 1 + (work.images ? work.images.length : 0);
-      const imgBadge = imgCount > 1 ? `<span style="color:var(--lavender-dark);font-size:0.75rem;">🖼 ${imgCount} รูป</span>` : '';
+      const imgBadge = imgCount > 1 ? `<span style="color:var(--lavender-dark);font-size:0.75rem;">🖼 ${imgCount} images</span>` : '';
       
       const isStarred = work.is_starred === true;
 
@@ -452,11 +452,11 @@ async function loadAdminWorks() {
         <div class="drag-handle">⋮⋮</div>
         <img src="${thumbSrc}" alt="${work.title}" class="admin-work-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23f0f0f0\\'/><text y=\\'50%\\' x=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' font-size=\\'40\\'>🖼</text></svg>'">
         <div class="admin-work-info">
-          <h3>${work.title} ${isStarred ? '<span class="star-badge-text">⭐ แนะนำ</span>' : ''}</h3>
+          <h3>${work.title} ${isStarred ? '<span class="star-badge-text">⭐ Featured</span>' : ''}</h3>
           <p>${work.tags} ${videoBadge} ${imgBadge}</p>
         </div>
         <div style="display: flex; gap: 5px; align-items: center;">
-          <button class="btn btn-sm ${work.starBtnClass}" onclick="event.stopPropagation(); toggleStar('${work.id}')" title="ติดดาวให้อยู่อันดับแรก">${work.starIcon}</button>
+          <button class="btn btn-sm ${work.starBtnClass}" onclick="event.stopPropagation(); toggleStar('${work.id}')" title="Star this work to keep it at the top">${work.starIcon}</button>
           <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); editWork('${work.id}')">✏️</button>
           <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteWork('${work.id}')">🗑</button>
         </div>
@@ -566,18 +566,18 @@ function editWork(id) {
   document.getElementById('videoInputsContainer').innerHTML = '';
   const workVideos = work.videos && work.videos.length > 0 ? work.videos : (work.video_url ? [work.video_url] : []);
   if (workVideos.length === 0) {
-    addDynamicInput('videoInputsContainer', 'videos', 'work-video-input', 'เช่น https://www.youtube.com/watch?v=xxxxx');
+    addDynamicInput('videoInputsContainer', 'videos', 'work-video-input', 'e.g., https://www.youtube.com/watch?v=xxxxx');
     document.querySelector('#videoInputsContainer .remove-input-btn').style.display = 'none';
   } else {
     workVideos.forEach(v => {
-      addDynamicInput('videoInputsContainer', 'videos', 'work-video-input', 'เช่น https://www.youtube.com/watch?v=xxxxx', v);
+      addDynamicInput('videoInputsContainer', 'videos', 'work-video-input', 'e.g., https://www.youtube.com/watch?v=xxxxx', v);
     });
   }
 
   // Populate external image links (since images includes both local and external, we extract only external for these inputs, OR we just show them in the multiImagePreviews. Let's just reset the external image inputs because existing images are managed by the multiImagePreviews container)
   document.getElementById('externalImageInputsContainer').innerHTML = `
     <div class="dynamic-input-row" style="display:flex; gap:10px; margin-bottom:0.5rem;">
-      <input type="url" name="external_images" class="work-ext-image-input" placeholder="ใส่ลิงก์รูปภาพเพิ่มเติม (เช่น https://...)" style="flex:1;">
+      <input type="url" name="external_images" class="work-ext-image-input" placeholder="Insert additional image link (e.g., https://...)" style="flex:1;">
       <button type="button" class="btn btn-secondary btn-sm remove-input-btn" style="padding:0 0.8rem; font-size:1.2rem; display:none;">✕</button>
     </div>
   `;
@@ -600,16 +600,16 @@ function editWork(id) {
   pendingGalleryFiles = [];
   renderMultiPreviews();
 
-  document.getElementById('submitBtn').innerHTML = '💾 บันทึกการแก้ไข';
+  document.getElementById('submitBtn').innerHTML = '💾 Save Changes';
   document.getElementById('cancelEditBtn').style.display = 'block';
-  document.querySelector('.upload-card h2').textContent = '✏️ แก้ไขผลงาน';
+  document.querySelector('.upload-card h2').textContent = '✏️ Edit Work';
   
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // --- Delete Work ---
 async function deleteWork(id) {
-  if (!confirm('ต้องการลบผลงานนี้จริงๆ หรือ?')) return;
+  if (!confirm('Are you sure you want to delete this work?')) return;
   try {
     const res = await fetch(`/api/works/${id}`, {
       method: 'DELETE',
@@ -621,13 +621,13 @@ async function deleteWork(id) {
         authToken = null;
         localStorage.removeItem('artfolio_token');
         hideAdminPanel();
-        showToast('Session หมดอายุ', 'error');
+        showToast('Session expired', 'error');
         return;
       }
-      showToast(data.error || 'ลบล้มเหลว', 'error');
+      showToast(data.error || 'Delete failed', 'error');
       return;
     }
-    showToast('ลบผลงานสำเร็จ');
+    showToast('Delete successful');
     loadAdminWorks();
   } catch (err) {
     showToast('เกิดข้อผิดพลาด', 'error');
