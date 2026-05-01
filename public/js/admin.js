@@ -382,8 +382,9 @@ function initUpload() {
       formData.append('images', file);
     });
 
-    // For editing, send list of existing images to keep
-    if (editingId && existingImages.length > 0) {
+    // For editing, ALWAYS send list of existing images to keep (even if empty)
+    // This tells the server exactly which images to retain
+    if (editingId) {
       formData.append('keep_existing_images', JSON.stringify(existingImages));
     }
 

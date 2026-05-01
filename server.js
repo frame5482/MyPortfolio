@@ -326,20 +326,24 @@ function convertDriveLink(url) {
 }
 
 // Helper to delete local or Cloudinary file
-async function deleteLocalFile(fileUrl) {
-  if (fileUrl && fileUrl.includes('res.cloudinary.com')) {
+async function deleteLocalFile(fileUrl, reason = 'unknown') {
+  if (!fileUrl) return;
+  if (fileUrl.includes('res.cloudinary.com')) {
     try {
       // Extract public_id from Cloudinary URL (assuming folder web-portfolio/)
       const parts = fileUrl.split('/');
       const filename = parts[parts.length - 1];
       const publicId = 'web-portfolio/' + filename.split('.')[0];
+      console.log(`🗑️ Deleting from Cloudinary: ${publicId} (reason: ${reason})`);
       await cloudinary.uploader.destroy(publicId);
+      console.log(`✅ Successfully deleted from Cloudinary: ${publicId}`);
     } catch(e) {
-      console.error('Cloudinary delete error:', e);
+      console.error('❌ Cloudinary delete error:', e);
     }
-  } else if (fileUrl && fileUrl.startsWith('/uploads/')) {
+  } else if (fileUrl.startsWith('/uploads/')) {
     const filePath = path.join(__dirname, fileUrl);
     if (fs.existsSync(filePath)) {
+      console.log(`🗑️ Deleting local file: ${filePath} (reason: ${reason})`);
       try { fs.unlinkSync(filePath); } catch(e) {}
     }
   }
@@ -352,11 +356,14 @@ app.delete('/api/works/:id', authMiddleware, async (req, res) => {
     if (!work) {
       return res.status(404).json({ error: 'Work not found' });
     }
+    console.log(`🗑️ Admin deleting work: "${work.title}" (${work._id})`);
     // Delete main image
-    deleteLocalFile(work.image_url);
+    await deleteLocalFile(work.image_url, `admin deleted work "${work.title}"`);
     // Delete additional images
     if (work.images && work.images.length > 0) {
-      work.images.forEach(img => deleteLocalFile(img));
+      for (const img of work.images) {
+        await deleteLocalFile(img, `admin deleted work "${work.title}"`);
+      }
     }
     await Work.findByIdAndDelete(req.params.id);
     res.json({ message: 'Work deleted successfully' });
@@ -392,10 +399,12 @@ app.put('/api/works/:id', authMiddleware, (req, res, next) => {
     const mainFile = req.files && req.files['image'] ? req.files['image'][0] : null;
     if (mainFile) {
       new_image_url = mainFile.path;
-      deleteLocalFile(work.image_url);
-    } else if (external_image_url) {
+      // Only delete old main image if it's being replaced with a NEW upload
+      await deleteLocalFile(work.image_url, 'main image replaced by new upload');
+    } else if (external_image_url && external_image_url !== work.image_url) {
       new_image_url = convertDriveLink(external_image_url);
-      deleteLocalFile(work.image_url);
+      // Only delete old main image if the URL actually changed
+      await deleteLocalFile(work.image_url, 'main image replaced by external URL');
     }
 
     if (!new_image_url && !video_url && !work.video_url) {
@@ -407,18 +416,26 @@ app.put('/api/works/:id', authMiddleware, (req, res, next) => {
     // Check if we should keep existing images
     let keepExisting = req.body.keep_existing_images;
     if (keepExisting) {
+      // Parse keep_existing_images properly
       if (typeof keepExisting === 'string') {
         try { keepExisting = JSON.parse(keepExisting); } catch(e) { keepExisting = [keepExisting]; }
       }
+      if (!Array.isArray(keepExisting)) keepExisting = [keepExisting];
       newImages = keepExisting.filter(u => u && u.trim());
+    } else {
+      // ✅ FIX: If keep_existing_images is NOT sent, keep ALL existing images by default
+      // This prevents accidental deletion when the frontend doesn't send this field
+      newImages = work.images ? [...work.images] : [];
+      console.log(`ℹ️ keep_existing_images not provided for work "${work.title}", keeping all ${newImages.length} existing images`);
     }
-    // Delete old images that are not in keepExisting
+
+    // Delete old images that are no longer in the keep list (only those explicitly removed)
     if (work.images && work.images.length > 0) {
-      work.images.forEach(img => {
+      for (const img of work.images) {
         if (!newImages.includes(img)) {
-          deleteLocalFile(img);
+          await deleteLocalFile(img, `image removed during edit of "${work.title}"`);
         }
-      });
+      }
     }
     // Add newly uploaded images
     if (req.files && req.files['images']) {
