@@ -2,7 +2,7 @@ const translations = {
   th: {
     nav_home: "✦ หน้าหลัก",
     nav_works: " ผลงาน ",
-    nav_admin: "IframeXeno",
+    nav_admin: "Amonphan Jamratsri",
     hero_title: "GameDev · Illustration · 3D Artist · VFX Artist ✨",
     hero_bio: "สวัสดี! ยินดีต้อนรับสู่ portfolio ถ้าหา 3D Artist หรือ VFX Artist ติดต่อมาได้เลย",
     btn_view_works: " ดูผลงาน ",
@@ -14,9 +14,11 @@ const translations = {
     skill_3d_desc: "สร้างโมเดลตัวละคร 3 มิติ โมเดลประกอบฉากสำหรับเกม หรือภาพ 3D เพื่อใช้ในงานต่างๆ",
     skill_vfx_title: "VFX Artist",
     skill_vfx_desc: "เชี่ยวชาญ Unity VFX graph และ Shader เพื่อสร้างเอฟเฟคสำหรับเกม และโปรแกรมต่างๆ",
+    section_tools: "เครื่องมือที่ฉันใช้",
+    section_tools_sub: "ซอฟต์แวร์และโปรแกรม",
     section_contact: "ติดต่อฉัน",
     contact_sub: "หากคุณสนใจในผลงานของฉัน",
-    footer_text: "สร้างด้วย 💜 โดย IframeXeno · © 2026",
+    footer_text: "สร้างด้วย 💜 โดย Amonphan Jamratsri · © 2026",
 
     // Works page
     works_header: " ผลงานของฉัน ",
@@ -42,7 +44,7 @@ const translations = {
     admin_header: "🔐 แผงควบคุม",
     admin_sub: "จัดการผลงานของคุณ",
     btn_logout: "🚪 ออกจากระบบ",
-    login_title: "IframeXeno",
+    login_title: "Amonphan Jamratsri",
     login_sub: "กรอกรหัสผ่านเพื่อจัดการผลงาน",
     placeholder_pass: "รหัสผ่าน...",
     btn_login: "🔓 เข้าสู่ระบบ",
@@ -75,7 +77,7 @@ const translations = {
   en: {
     nav_home: "✦ Home",
     nav_works: " Works ",
-    nav_admin: "IframeXeno",
+    nav_admin: "Amonphan Jamratsri",
     hero_title: "GameDev · Illustration · 3D Artist · VFX Artist ✨",
     hero_bio: "Hello! Welcome to my portfolio. If you're looking for a 3D Artist or VFX Artist, feel free to contact me.",
     btn_view_works: " View Works ",
@@ -87,9 +89,11 @@ const translations = {
     skill_3d_desc: "Creating 3D character models, props for games, or 3D images for various uses.",
     skill_vfx_title: "VFX Artist",
     skill_vfx_desc: "Specializing in Unity VFX Graph and Shaders to create effects for games and applications.",
+    section_tools: "Tools I Use",
+    section_tools_sub: "Software & Applications",
     section_contact: "Contact Me",
     contact_sub: "If you are interested in my work",
-    footer_text: "Made with 💜 by IframeXeno · © 2026",
+    footer_text: "Made with 💜 by Amonphan Jamratsri · © 2026",
 
     // Works page
     works_header: " My Works ",
@@ -115,7 +119,7 @@ const translations = {
     admin_header: "🔐 Admin Panel",
     admin_sub: "Manage your works",
     btn_logout: "🚪 Logout",
-    login_title: "IframeXeno",
+    login_title: "Amonphan Jamratsri",
     login_sub: "Enter password to manage works",
     placeholder_pass: "Password...",
     btn_login: "🔓 Login",
@@ -148,7 +152,7 @@ const translations = {
   jp: {
     nav_home: "✦ ホーム",
     nav_works: " 作品 ",
-    nav_admin: "IframeXeno",
+    nav_admin: "Amonphan Jamratsri",
     hero_title: "ゲーム開発 · イラスト · 3Dアーティスト · VFXアーティスト ✨",
     hero_bio: "こんにちは！ポートフォリオへようこそ。3DアーティストまたはVFXアーティストをお探しの場合は、お気軽にお問い合わせください。",
     btn_view_works: " 作品を見る ",
@@ -160,9 +164,11 @@ const translations = {
     skill_3d_desc: "ゲーム用の3Dキャラクター、プロップ、または様々な用途の3D画像制作。",
     skill_vfx_title: "VFXアーティスト",
     skill_vfx_desc: "Unity VFX GraphやShaderを駆使し、ゲームやアプリのエフェクトを制作。",
+    section_tools: "使用ツール",
+    section_tools_sub: "ソフトウェア・アプリケーション",
     section_contact: "お問い合わせ",
     contact_sub: "私の作品に興味をお持ちでしたら、お気軽にご連絡ください。",
-    footer_text: "IframeXenoによって💜を込めて作られました · © 2026",
+    footer_text: "Amonphan Jamratsriによって💜を込めて作られました · © 2026",
 
     // Works page
     works_header: "私の作品",
@@ -188,7 +194,7 @@ const translations = {
     admin_header: "🔐 管理パネル",
     admin_sub: "作品を管理する",
     btn_logout: "🚪 ログアウト",
-    login_title: "IframeXeno",
+    login_title: "Amonphan Jamratsri",
     login_sub: "パスワードを入力して管理画面へ",
     placeholder_pass: "パスワード...",
     btn_login: "🔓 ログイン",

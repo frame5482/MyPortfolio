@@ -68,17 +68,20 @@ function getYouTubeThumbnail(url) {
 }
 
 // --- Load Tags ---
+let tagMeta = []; // Store tag metadata for use in rendering
+
 async function loadTags() {
   try {
     const res = await fetch('/api/tags');
     const tags = await res.json();
+    tagMeta = tags; // Store for use in renderWorks
     const container = document.getElementById('tagFilters');
     tags.forEach(tag => {
       const btn = document.createElement('button');
-      btn.className = 'tag-btn';
-      btn.dataset.tag = tag;
-      btn.textContent = tag;
-      btn.addEventListener('click', () => filterByTag(tag));
+      btn.className = 'tag-btn' + (tag.is_highlighted ? ' tag-btn-highlighted' : '');
+      btn.dataset.tag = tag.name;
+      btn.textContent = tag.is_highlighted ? `⭐ ${tag.name}` : tag.name;
+      btn.addEventListener('click', () => filterByTag(tag.name));
       container.appendChild(btn);
     });
   } catch (err) {
@@ -145,7 +148,12 @@ function renderWorks() {
     const desc = work[`description_${lang}`] || work.description;
 
     const tags = work.tags.split(',').map(t => t.trim());
-    const tagsHtml = tags.map(t => `<span class="card-tag">${t}</span>`).join('');
+    const tagsHtml = tags.map(t => {
+      const meta = tagMeta.find(m => m.name === t);
+      const isHighlighted = meta && meta.is_highlighted;
+      const cls = isHighlighted ? 'card-tag card-tag-highlighted' : 'card-tag';
+      return `<span class="${cls}">${isHighlighted ? '⭐ ' : ''}${t}</span>`;
+    }).join('');
 
     const thumbSrc = work.image_url || getYouTubeThumbnail(work.video_url);
     const videoBadge = work.video_url ? '<span class="video-badge">▶ Video</span>' : '';

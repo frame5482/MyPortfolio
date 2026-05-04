@@ -65,6 +65,7 @@ function checkAuth() {
   if (authToken) {
     showAdminPanel();
     loadAdminWorks();
+    loadAdminTags();
   }
 }
 
@@ -72,6 +73,7 @@ function showAdminPanel() {
   document.getElementById('loginSection').style.display = 'none';
   document.getElementById('uploadSection').classList.add('visible');
   document.getElementById('worksListSection').classList.add('visible');
+  document.getElementById('tagManagerSection').classList.add('visible');
   document.getElementById('adminTopbar').classList.add('visible');
 }
 
@@ -79,6 +81,7 @@ function hideAdminPanel() {
   document.getElementById('loginSection').style.display = '';
   document.getElementById('uploadSection').classList.remove('visible');
   document.getElementById('worksListSection').classList.remove('visible');
+  document.getElementById('tagManagerSection').classList.remove('visible');
   document.getElementById('adminTopbar').classList.remove('visible');
 }
 
@@ -104,6 +107,7 @@ function initLogin() {
       showToast('Login successful! ✨');
       showAdminPanel();
       loadAdminWorks();
+      loadAdminTags();
     } catch (err) {
       showToast('An error occurred', 'error');
     }
@@ -451,6 +455,7 @@ function initUpload() {
       showToast(editingId ? 'Update successful! ✨' : 'Upload successful! ✨');
       cancelEdit();
       loadAdminWorks();
+      loadAdminTags();
     } catch (err) {
       console.error('Upload error:', err);
       showToast(err.error || 'Error uploading', 'error');
@@ -722,3 +727,147 @@ function getYouTubeThumbnail(url) {
   const id = getYouTubeId(url);
   return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : '';
 }
+
+// ============================================================
+// Tag Manager
+// ============================================================
+
+let adminTags = [];
+let tagDragSource = null;
+
+async function loadAdminTags() {
+  try {
+    const res = await fetch('/api/tags');
+    adminTags = await res.json();
+    renderTagManager();
+  } catch (err) {
+    console.error('Failed to load tags:', err);
+  }
+}
+
+function renderTagManager() {
+  const container = document.getElementById('tagManagerList');
+  const emptyState = document.getElementById('tagManagerEmpty');
+
+  if (!adminTags || adminTags.length === 0) {
+    container.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  container.innerHTML = adminTags.map((tag, index) => {
+    const highlightClass = tag.is_highlighted ? 'tag-highlighted' : '';
+    const highlightBtnClass = tag.is_highlighted ? 'btn-highlight-active' : 'btn-secondary';
+    const highlightIcon = tag.is_highlighted ? '✨' : '☆';
+    const orderBadge = `<span class="tag-order-badge">#${index + 1}</span>`;
+
+    return `
+      <div class="tag-manager-item ${highlightClass}" data-tag-id="${tag.id}" draggable="true">
+        <div class="tag-drag-handle" title="Drag to reorder">⋮⋮</div>
+        ${orderBadge}
+        <span class="tag-name">${tag.name}</span>
+        <div class="tag-actions">
+          <button class="btn btn-sm ${highlightBtnClass} tag-highlight-btn" 
+                  onclick="event.stopPropagation(); toggleTagHighlight('${tag.id}')" 
+                  title="${tag.is_highlighted ? 'Remove highlight' : 'Highlight this tag'}">
+            ${highlightIcon}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Attach drag events
+  container.querySelectorAll('.tag-manager-item').forEach(item => {
+    item.addEventListener('dragstart', tagDragStart);
+    item.addEventListener('dragover', tagDragOver);
+    item.addEventListener('dragenter', tagDragEnter);
+    item.addEventListener('dragleave', tagDragLeave);
+    item.addEventListener('drop', tagDrop);
+    item.addEventListener('dragend', tagDragEnd);
+  });
+}
+
+// --- Tag Drag & Drop ---
+function tagDragStart(e) {
+  tagDragSource = e.currentTarget;
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.classList.add('tag-dragging');
+}
+
+function tagDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+}
+
+function tagDragEnter(e) {
+  e.currentTarget.classList.add('tag-drag-over');
+}
+
+function tagDragLeave(e) {
+  e.currentTarget.classList.remove('tag-drag-over');
+}
+
+async function tagDrop(e) {
+  e.stopPropagation();
+  e.currentTarget.classList.remove('tag-drag-over');
+
+  if (tagDragSource && tagDragSource !== e.currentTarget) {
+    const allItems = Array.from(document.querySelectorAll('.tag-manager-item'));
+    const sourceIndex = allItems.indexOf(tagDragSource);
+    const targetIndex = allItems.indexOf(e.currentTarget);
+    const list = document.getElementById('tagManagerList');
+
+    if (sourceIndex < targetIndex) {
+      list.insertBefore(tagDragSource, e.currentTarget.nextSibling);
+    } else {
+      list.insertBefore(tagDragSource, e.currentTarget);
+    }
+
+    // Save new order
+    const orderedIds = Array.from(document.querySelectorAll('.tag-manager-item')).map(item => item.dataset.tagId);
+    try {
+      await fetch('/api/tags/reorder', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ orderedIds })
+      });
+      showToast('Tag order saved! 🏷️');
+      loadAdminTags();
+    } catch (err) {
+      console.error('Tag reorder error:', err);
+      showToast('Failed to reorder tags', 'error');
+    }
+  }
+}
+
+function tagDragEnd(e) {
+  e.currentTarget.classList.remove('tag-dragging');
+  document.querySelectorAll('.tag-manager-item').forEach(el => el.classList.remove('tag-drag-over'));
+}
+
+// --- Toggle Tag Highlight ---
+window.toggleTagHighlight = async function(id) {
+  try {
+    const res = await fetch(`/api/tags/${id}/highlight`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      showToast(data.is_highlighted ? 'Tag highlighted! ✨' : 'Highlight removed');
+      loadAdminTags();
+    } else {
+      const errData = await res.json();
+      console.error('Highlight toggle failed:', errData);
+      showToast('Failed to toggle highlight', 'error');
+    }
+  } catch (err) {
+    console.error('Toggle highlight error:', err);
+    showToast('Failed to toggle highlight', 'error');
+  }
+};

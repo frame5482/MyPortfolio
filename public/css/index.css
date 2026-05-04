@@ -96,6 +96,49 @@
 .skill-card h3 { font-size: 1.1rem; margin-bottom: 0.4rem; }
 .skill-card p { font-size: 0.85rem; color: var(--text-light); line-height: 1.6; }
 
+/* Tools */
+.tools-section { padding: 3rem 2rem; max-width: 900px; margin: 0 auto; }
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1.2rem;
+  margin-top: 1.5rem;
+}
+
+.tool-card {
+  padding: 1.8rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  cursor: default;
+}
+
+.tool-icon {
+  width: 56px; height: 56px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform var(--transition-med);
+}
+
+.tool-card:hover .tool-icon { transform: scale(1.12) rotate(-4deg); }
+
+.tool-icon svg { width: 32px; height: 32px; }
+
+.unity-icon  { background: #1a1a2e; color: #ffffff; }
+.maya-icon   { background: #d4f4f4; color: #00a0a0; }
+.blender-icon { background: #fff3e0; color: #E87D0D; }
+.csp-icon    { background: #fde8e8; color: #CF1313; }
+
+.tool-name {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+}
+
 /* Contact */
 .contact-section { padding: 3rem 2rem 4rem; max-width: 700px; margin: 0 auto; text-align: center; }
 
@@ -115,4 +158,5 @@
   .hero-name { font-size: 2rem; }
   .avatar-ring { width: 140px; height: 140px; }
   .skills-grid { grid-template-columns: 1fr; }
+  .tools-grid { grid-template-columns: repeat(2, 1fr); }
 }

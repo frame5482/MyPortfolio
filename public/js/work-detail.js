@@ -94,7 +94,7 @@ function renderDetail() {
   const description = work[`description_${lang}`] || work.description;
 
   // Update page title
-  document.title = `${title} — IframeXeno ✨`;
+  document.title = `${title} — Amonphan Jamratsri ✨`;
 
   // Breadcrumb
   document.getElementById('breadcrumbTitle').textContent = title;

@@ -14,7 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- Database ---
-const Work = require('./db/setup');
+const { Work, Tag } = require('./db/setup');
 
 // --- Middleware ---
 app.use(cors());
@@ -172,9 +172,10 @@ app.get('/api/works/:id', async (req, res) => {
   }
 });
 
-// Get unique tags
+// Get unique tags (with order & highlight info)
 app.get('/api/tags', async (req, res) => {
   try {
+    // First, sync tags from works into Tag collection
     const works = await Work.find({}, 'tags');
     const tagSet = new Set();
     works.forEach(row => {
@@ -185,8 +186,72 @@ app.get('/api/tags', async (req, res) => {
         });
       }
     });
-    res.json([...tagSet].sort());
+
+    // Upsert each tag into Tag collection (don't overwrite existing order/highlight)
+    for (const tagName of tagSet) {
+      await Tag.findOneAndUpdate(
+        { name: tagName },
+        { $setOnInsert: { name: tagName, order: 999, is_highlighted: false } },
+        { upsert: true, new: true }
+      );
+    }
+
+    // Remove tags that no longer exist in any works
+    await Tag.deleteMany({ name: { $nin: [...tagSet] } });
+
+    // Return all tags sorted by order
+    const tags = await Tag.find({}).sort({ order: 1, name: 1 });
+    res.json(tags.map(t => ({
+      id: t._id,
+      name: t.name,
+      order: t.order,
+      is_highlighted: t.is_highlighted
+    })));
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Reorder tags
+app.put('/api/tags/reorder', authMiddleware, async (req, res) => {
+  try {
+    const { orderedIds } = req.body;
+    if (!Array.isArray(orderedIds)) return res.status(400).json({ error: 'Invalid data' });
+
+    const bulkOps = orderedIds.map((id, index) => {
+      try {
+        return {
+          updateOne: {
+            filter: { _id: new mongoose.Types.ObjectId(id) },
+            update: { $set: { order: index } }
+          }
+        };
+      } catch (e) { return null; }
+    }).filter(Boolean);
+
+    if (bulkOps.length > 0) {
+      await Tag.bulkWrite(bulkOps);
+    }
+
+    console.log('✅ Reordered tags successfully');
+    res.json({ success: true, message: 'Tags reordered successfully' });
+  } catch (err) {
+    console.error('❌ Tag reorder error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Toggle tag highlight
+app.put('/api/tags/:id/highlight', authMiddleware, async (req, res) => {
+  try {
+    const tag = await Tag.findById(req.params.id);
+    if (!tag) return res.status(404).json({ error: 'Tag not found' });
+    tag.is_highlighted = !tag.is_highlighted;
+    await tag.save();
+    console.log(`✨ Toggled highlight for tag: ${tag.name} (Status: ${tag.is_highlighted})`);
+    res.json({ success: true, is_highlighted: tag.is_highlighted });
+  } catch (err) {
+    console.error('❌ Tag highlight toggle error:', err);
     res.status(500).json({ error: err.message });
   }
 });

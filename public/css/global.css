@@ -326,6 +326,20 @@ body::before {
   animation: logoBounce 3s ease-in-out infinite;
 }
 
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.logo-sub {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--text-light);
+  opacity: 0.7;
+  letter-spacing: 0.5px;
+}
+
 @keyframes logoBounce {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   25%      { transform: translateY(-3px) rotate(-5deg); }
